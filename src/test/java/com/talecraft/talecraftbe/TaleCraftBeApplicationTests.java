@@ -1,4 +1,4 @@
-package com.ohgiraffers.talecraftbe;
+package com.talecraft.talecraftbe;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
