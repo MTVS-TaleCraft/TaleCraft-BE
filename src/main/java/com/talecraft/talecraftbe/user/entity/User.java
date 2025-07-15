@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -25,6 +26,10 @@ public class User implements UserDetails {
 
     @Column(name = "authority_id")
     private Long authorityId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "authority_id", insertable = false, updatable = false)
+    private UserAuthority authority;
 
     public User() {}
 
@@ -68,9 +73,17 @@ public class User implements UserDetails {
         this.authorityId = authorityId;
     }
 
+    public UserAuthority getAuthority() { return authority; }
+    public void setAuthority(UserAuthority authority) { this.authority = authority; }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
+        if (authority == null) return Collections.emptyList();
+        List<GrantedAuthority> authorities = new java.util.ArrayList<>();
+        if (authority.isGeneral()) authorities.add(() -> "ROLE_GENERAL");
+        if (authority.isPremium()) authorities.add(() -> "ROLE_PREMIUM");
+        if (authority.isAdmin()) authorities.add(() -> "ROLE_ADMIN");
+        return authorities;
     }
 
     @Override

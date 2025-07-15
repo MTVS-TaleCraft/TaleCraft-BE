@@ -5,6 +5,7 @@ import com.talecraft.talecraftbe.auth.dto.SignupRequest;
 import com.talecraft.talecraftbe.user.entity.User;
 import com.talecraft.talecraftbe.user.repository.UserRepository;
 import com.talecraft.talecraftbe.auth.config.JwtProvider;
+import com.talecraft.talecraftbe.verification.service.EmailVerificationService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,15 +21,18 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authManager;
     private final JwtProvider jwtProvider;
+    private final EmailVerificationService emailVerificationService;
 
     public AuthService(UserRepository userRepo,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authManager,
-                       JwtProvider jwtProvider) {
+                       JwtProvider jwtProvider,
+                       EmailVerificationService emailVerificationService) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.authManager = authManager;
         this.jwtProvider = jwtProvider;
+        this.emailVerificationService = emailVerificationService;
     }
 
     /**
@@ -44,6 +48,9 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(req.password()));
         user.setAuthorityId(1L);
         userRepo.save(user);
+
+        // 회원가입 후 이메일 인증 메일 발송
+        emailVerificationService.createAndSendToken(req.email());
     }
 
     /**

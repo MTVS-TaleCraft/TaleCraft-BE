@@ -26,12 +26,8 @@ public class EmailVerificationService {
     /** 토큰 생성 후 메일 발송 */
     public void createAndSendToken(String email) {
         String code = UUID.randomUUID().toString();
-        Instant expiry = Instant.now().plus(1, ChronoUnit.DAYS);
-
-        EmailVerification ev = new EmailVerification(email, code, expiry);
-        repo.save(ev);
-
-        String link = "http://.../api/verification?code=" + code;
+        // DB 저장 X
+        String link = "http://.../api/verification?code=" + code + "&email=" + email;
         SimpleMailMessage mail = new SimpleMailMessage();
         mail.setTo(email);
         mail.setSubject("이메일 인증");
@@ -40,7 +36,11 @@ public class EmailVerificationService {
     }
 
     /** 토큰 검증 */
-    public boolean verify(String code) {
+    public boolean verify(String code, String email) {
+        // code와 email로 검증
+        // 검증 성공 시에만 email_verification 테이블에 저장
+        EmailVerification ev = new EmailVerification(email, code, Instant.now().plus(1, ChronoUnit.DAYS));
+        repo.save(ev);
         return repo.findByVerificationCode(code)
                 .filter(e -> !e.isVerified() && e.getExpiredDate().isAfter(Instant.now()))
                 .map(e -> {

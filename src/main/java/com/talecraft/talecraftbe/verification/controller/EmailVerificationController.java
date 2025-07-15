@@ -28,9 +28,10 @@ public class EmailVerificationController {
 
     @GetMapping
     public ResponseEntity<EmailVerificationResponse> verify(
-            @RequestParam String code) {
+            @RequestParam String code,
+            @RequestParam String email) {
 
-        boolean ok = service.verify(code);
+        boolean ok = service.verify(code, email);
         if (ok) {
             return ResponseEntity.ok(new EmailVerificationResponse(true, "인증 완료"));
         }
