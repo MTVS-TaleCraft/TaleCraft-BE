@@ -1,6 +1,7 @@
 package com.talecraft.talecraftbe.novel.service;
 
 
+import com.talecraft.talecraftbe.novel.dto.request.RequestPostNovelDto;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,5 +16,7 @@ public class NovelService {
     }
 
 
-
+    public void createNovel(RequestPostNovelDto requestPostNovelDto) {
+        requestPostNovelDto.
+    }
 }
