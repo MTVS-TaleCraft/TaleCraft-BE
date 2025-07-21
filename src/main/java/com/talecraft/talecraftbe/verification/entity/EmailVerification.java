@@ -27,12 +27,27 @@ public class EmailVerification {
     @Column(name = "signed_up", nullable = false)
     private boolean signedUp = false;
 
+    // 회원가입 정보를 임시 저장할 필드들
+    @Column(name = "user_name", length = 255)
+    private String userName;
+
+    @Column(name = "password", length = 255)
+    private String password;
+
     protected EmailVerification() {}
 
     public EmailVerification(String email, String verificationCode, Instant expiredDate) {
         this.email = email;
         this.verificationCode = verificationCode;
         this.expiredDate = expiredDate;
+    }
+
+    public EmailVerification(String email, String verificationCode, Instant expiredDate, String userName, String password) {
+        this.email = email;
+        this.verificationCode = verificationCode;
+        this.expiredDate = expiredDate;
+        this.userName = userName;
+        this.password = password;
     }
 
     public Long getId() {
@@ -81,6 +96,22 @@ public class EmailVerification {
 
     public void setSignedUp(boolean signedUp) {
         this.signedUp = signedUp;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
 

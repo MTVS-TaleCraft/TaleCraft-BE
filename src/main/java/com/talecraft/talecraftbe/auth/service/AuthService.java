@@ -36,21 +36,27 @@ public class AuthService {
     }
 
     /**
-     * 회원가입: 이메일 중복 검사 후 저장
+     * 회원가입: 이메일 중복 검사 후 인증 메일만 발송 (User 테이블에는 아직 저장하지 않음)
      */
     public void signup(SignupRequest req) {
         if (userRepo.existsByEmail(req.email())) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
+        
+        // 이메일 인증 메일 발송 (User 테이블에는 저장하지 않음)
+        emailVerificationService.createAndSendToken(req.email(), req.userName(), req.password());
+    }
+
+    /**
+     * 이메일 인증 완료 후 실제 회원가입 처리
+     */
+    public void completeSignup(String email, String userName, String password) {
         User user = new User();
-        user.setUserName(req.userName());
-        user.setEmail(req.email());
-        user.setPassword(passwordEncoder.encode(req.password()));
+        user.setUserName(userName);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
         user.setAuthorityId(1L);
         userRepo.save(user);
-
-        // 회원가입 후 이메일 인증 메일 발송
-        emailVerificationService.createAndSendToken(req.email());
     }
 
     /**
