@@ -13,4 +13,7 @@ public class ResponsePatchNovelDto {
     private String message;
 
 
+    public ResponsePatchNovelDto(String message) {
+        this.message = message;
+    }
 }
