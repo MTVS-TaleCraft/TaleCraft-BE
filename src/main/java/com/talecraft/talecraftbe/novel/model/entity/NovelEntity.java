@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity
@@ -13,6 +14,7 @@ import org.hibernate.annotations.ColumnDefault;
 @Builder(toBuilder = true)
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class NovelEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -30,10 +32,6 @@ public class NovelEntity {
 
     @Column(nullable = false)
     private Availability availability;
-
-    public NovelEntity() {
-
-    }
 
     @JoinColumn
     @ManyToOne(fetch = FetchType.LAZY)

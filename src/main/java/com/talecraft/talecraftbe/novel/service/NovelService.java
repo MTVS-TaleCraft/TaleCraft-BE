@@ -53,7 +53,7 @@ public class NovelService {
     }
 
 
-    public ResponseEntity<ResponsePatchNovelDto> updateNovel(RequestPatchNovelDto requestPatchNovelDto, long novelId,User user) {
+    public ResponseEntity<ResponsePatchNovelDto> updateNovel(RequestPatchNovelDto requestPatchNovelDto, long novelId, User user) {
          NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
          novelEntity.updateTitleImage(requestPatchNovelDto.getTitleImage());
          novelEntity.updateSummary(requestPatchNovelDto.getSummary());
@@ -77,7 +77,7 @@ public class NovelService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseGetListNovelDto> getNovelList( User user) {
+    public ResponseEntity<ResponseGetListNovelDto> getNovelList(User user) {
         List<NovelEntity> novelEntityList = novelRepository.findAll();
         ResponseGetListNovelDto responseGetListNovelDto = new ResponseGetListNovelDto();
         return new ResponseEntity<>(responseGetListNovelDto,HttpStatus.OK);
