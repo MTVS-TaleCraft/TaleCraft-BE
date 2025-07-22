@@ -1,5 +1,6 @@
 package com.talecraft.talecraftbe.novel.dto.request;
 
+
 import com.talecraft.talecraftbe.novel.model.entity.Availability;
 import lombok.AllArgsConstructor;
 import lombok.Data;

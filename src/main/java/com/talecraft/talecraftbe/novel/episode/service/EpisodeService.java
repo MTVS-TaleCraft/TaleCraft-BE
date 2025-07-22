@@ -26,7 +26,7 @@ public class EpisodeService {
         this.episodeRepository = episodeRepository;
         this.novelRepository = novelRepository;
     }
-/*
+
     @Transactional
     public ResponseEntity<ResponsePostEpisodeDto> createEpisode(long novelId, RequestPostEpisodeDto requestPostEpisodeDto) {
         NovelEntity novelEntity =novelRepository.findById(novelId).orElseThrow(()->new RuntimeException("No episode with id " + novelId));
@@ -42,16 +42,16 @@ public class EpisodeService {
         EpisodeEntity episodeEntity = new EpisodeEntity(requestPostEpisodeDto.getTitle(),requestPostEpisodeDto.getContent(),note);
         ResponsePostEpisodeDto responsePostEpisodeDto = new ResponsePostEpisodeDto();
 
-        try{
+     /*   try{
             episodeRepository.save(episodeEntity);
             response.
         } catch (RuntimeException e) {
             System.out.println(e);
             System.out.println("Error creating episode");
         }
-
+*/
         return new ResponseEntity<>(responsePostEpisodeDto, HttpStatus.CREATED);
-    }*/
+    }
 
 
 }
