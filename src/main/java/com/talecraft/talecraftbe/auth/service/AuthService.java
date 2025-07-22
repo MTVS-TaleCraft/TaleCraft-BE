@@ -36,27 +36,34 @@ public class AuthService {
     }
 
     /**
-     * 회원가입: 이메일 중복 검사 후 인증 메일만 발송 (User 테이블에는 아직 저장하지 않음)
+     * 회원가입: 이메일 인증 확인 후 USERS 테이블에 저장하고 SIGNED_UP = 1로 변경
      */
     public void signup(SignupRequest req) {
+        // 이메일 중복 검사
         if (userRepo.existsByEmail(req.email())) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
         
-        // 이메일 인증 메일 발송 (User 테이블에는 저장하지 않음)
-        emailVerificationService.createAndSendToken(req.email(), req.userName(), req.password());
-    }
-
-    /**
-     * 이메일 인증 완료 후 실제 회원가입 처리
-     */
-    public void completeSignup(String email, String userName, String password) {
+        // 이메일 인증이 완료되었는지 확인
+        if (!emailVerificationService.isEmailVerified(req.email())) {
+            throw new IllegalArgumentException("이메일 인증이 필요합니다. 먼저 이메일 인증을 완료해주세요.");
+        }
+        
+        // 이미 회원가입이 완료되었는지 확인
+        if (emailVerificationService.isSignedUp(req.email())) {
+            throw new IllegalArgumentException("이미 회원가입이 완료된 이메일입니다.");
+        }
+        
+        // USERS 테이블에 회원 정보 저장 (authority_id = 1)
         User user = new User();
-        user.setUserName(userName);
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setAuthorityId(1L);
+        user.setUserName(req.userName());
+        user.setEmail(req.email());
+        user.setPassword(passwordEncoder.encode(req.password()));
+        user.setAuthorityId(1L); // AUTHORITIES 테이블의 ID=1 (일반 사용자)
         userRepo.save(user);
+        
+        // 회원가입 완료 처리 (SIGNED_UP = 1)
+        emailVerificationService.markAsSignedUp(req.email());
     }
 
     /**

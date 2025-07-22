@@ -3,41 +3,41 @@ package com.talecraft.talecraftbe.auth.controller;
 import com.talecraft.talecraftbe.auth.dto.LoginRequest;
 import com.talecraft.talecraftbe.auth.dto.SignupRequest;
 import com.talecraft.talecraftbe.auth.service.AuthService;
-import com.talecraft.talecraftbe.verification.dto.EmailVerificationRequest;
-import com.talecraft.talecraftbe.verification.service.EmailVerificationService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    private final AuthService authService;
-    private final EmailVerificationService emailVerificationService;
 
-    public AuthController(AuthService authService, EmailVerificationService emailVerificationService) {
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.emailVerificationService = emailVerificationService;
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@RequestBody SignupRequest req) {
-        // 이메일 인증 요청으로 변경
-        EmailVerificationRequest verificationReq = new EmailVerificationRequest(
-                req.email(), req.userName(), req.password());
-        emailVerificationService.createAndSendToken(
-                verificationReq.email(), 
-                verificationReq.userName(), 
-                verificationReq.password());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, String>> signup(@RequestBody @Valid SignupRequest req) {
+        try {
+            authService.signup(req);
+            return ResponseEntity.ok(Map.of("message", "회원가입이 완료되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(
-            @RequestBody LoginRequest req,
-            HttpServletResponse response    // ← 이 파라미터를 추가합니다.
-    ) {
-        authService.login(req, response);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, String>> login(@RequestBody @Valid LoginRequest req, 
+                                                     HttpServletResponse response) {
+        try {
+            authService.login(req, response);
+            return ResponseEntity.ok(Map.of("message", "로그인이 완료되었습니다."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "로그인에 실패했습니다."));
+        }
     }
 }
