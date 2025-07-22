@@ -6,8 +6,11 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @RequiredArgsConstructor
-public class ResponseDeleteNovelDto {
+@AllArgsConstructor
+public class ResponsePatchNovelDto {
+    private long id;
     private String message;
+
+
 }

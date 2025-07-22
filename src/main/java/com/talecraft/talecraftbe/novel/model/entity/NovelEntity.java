@@ -1,10 +1,18 @@
 package com.talecraft.talecraftbe.novel.model.entity;
 
 
+import com.talecraft.talecraftbe.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
-@Table
+@Table(name ="novels")
+@Builder(toBuilder = true)
+@Getter
+@AllArgsConstructor
 public class NovelEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -21,9 +29,42 @@ public class NovelEntity {
     private String summary;
 
     @Column(nullable = false)
-    private Availability availabilty;
+    private Availability availability;
 
-    //유저 외래키 받아올것
-    //@Column
-    //private
+    public NovelEntity() {
+
+    }
+
+    @JoinColumn
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
+
+    @Column
+    @ColumnDefault("0")
+    boolean isFinished;
+
+    @Column
+    @ColumnDefault("0")
+    boolean isDeleted;
+
+    @Column
+    @ColumnDefault("0")
+    boolean isBanned;
+
+    public void updateIsBanned(boolean isBanned) {
+        this.isBanned = isBanned;
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+    public void updateSummary(String summary) {
+        this.summary = summary;
+    }
+    public void updateAvailability(Availability availability) {
+        this.availability = availability;
+    }
+    public void updateTitleImage(String titleImage) {
+        this.titleImage = titleImage;
+    }
 }

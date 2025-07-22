@@ -26,7 +26,7 @@ public class EpisodeService {
         this.episodeRepository = episodeRepository;
         this.novelRepository = novelRepository;
     }
-
+/*
     @Transactional
     public ResponseEntity<ResponsePostEpisodeDto> createEpisode(long novelId, RequestPostEpisodeDto requestPostEpisodeDto) {
         NovelEntity novelEntity =novelRepository.findById(novelId).orElseThrow(()->new RuntimeException("No episode with id " + novelId));
@@ -51,7 +51,7 @@ public class EpisodeService {
         }
 
         return new ResponseEntity<>(responsePostEpisodeDto, HttpStatus.CREATED);
-    }
+    }*/
 
 
 }
