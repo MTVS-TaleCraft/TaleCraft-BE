@@ -32,7 +32,7 @@ public class EmailVerificationService {
         EmailVerification ev = new EmailVerification(email, code, expiredDate);
         repo.save(ev);
         
-        String link = "http://localhost:8080/api/verification?code=" + code + "&email=" + email;
+        String link = "http://localhost:8081/api/verification?code=" + code + "&email=" + email;
         SimpleMailMessage mail = new SimpleMailMessage();
         mail.setTo(email);
         mail.setSubject("이메일 인증");
