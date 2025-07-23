@@ -38,8 +38,9 @@ public class SecurityConfig {
                 .csrf(cs -> cs.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 1) 회원가입·로그인
-                        .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                        // 1) 회원가입·로그인 (인증 불필요)
+                        .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
 
                         // 2) 이메일 인증 API
                         .requestMatchers(HttpMethod.POST, "/api/verification/send").permitAll()

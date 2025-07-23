@@ -14,10 +14,13 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class JwtProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
     private final Key key;
     private final long tokenValidityInMs;
     private final UserDetailsService userDetailsService;
@@ -48,8 +51,10 @@ public class JwtProvider {
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
+            logger.info("Token validation successful");
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            logger.error("Token validation failed: ", e);
             return false;
         }
     }
@@ -60,7 +65,12 @@ public class JwtProvider {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        UserDetails user = userDetailsService.loadUserByUsername(claims.getSubject());
+        String subject = claims.getSubject();
+        logger.info("JWT subject: {}", subject);
+        
+        UserDetails user = userDetailsService.loadUserByUsername(subject);
+        logger.info("Loaded user: {}", user.getUsername());
+        
         return new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
     }
 }
