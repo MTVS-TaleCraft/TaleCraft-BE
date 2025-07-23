@@ -38,7 +38,7 @@ public class EpisodeService {
             } else {
                 note = requestPostEpisodeDto.getNote();
             }
-            //공지여부가 뭔지 모르겠어서 일단 추가 안함.
+
             EpisodeEntity episodeEntity = new EpisodeEntity(requestPostEpisodeDto.getTitle(), requestPostEpisodeDto.getContent(), note);
             responsePostEpisodeDto = new ResponsePostEpisodeDto();
 
@@ -52,6 +52,10 @@ public class EpisodeService {
             return new ResponseEntity<>(responsePostEpisodeDto, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+
+
 
 
 }
