@@ -11,8 +11,7 @@ import lombok.RequiredArgsConstructor;
 public class ResponsePatchNovelDto {
     private long id;
     private String message;
-
-
+    
     public ResponsePatchNovelDto(String message) {
         this.message = message;
     }

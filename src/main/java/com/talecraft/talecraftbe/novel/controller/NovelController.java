@@ -3,9 +3,7 @@ package com.talecraft.talecraftbe.novel.controller;
 
 import com.talecraft.talecraftbe.novel.dto.request.RequestPatchNovelDto;
 import com.talecraft.talecraftbe.novel.dto.request.RequestPostNovelDto;
-import com.talecraft.talecraftbe.novel.dto.response.ResponseDeleteNovelDto;
-import com.talecraft.talecraftbe.novel.dto.response.ResponsePatchNovelDto;
-import com.talecraft.talecraftbe.novel.dto.response.ResponsePostNovelDto;
+import com.talecraft.talecraftbe.novel.dto.response.*;
 import com.talecraft.talecraftbe.novel.service.NovelService;
 import com.talecraft.talecraftbe.user.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,5 +35,16 @@ public class NovelController {
     @DeleteMapping("/{novelId}")
     public ResponseEntity<ResponseDeleteNovelDto> deleteNovel(@PathVariable long novelId, @AuthenticationPrincipal User user) {
         return novelService.deleteNovel(novelId,user);
+    }
+
+    //단건 조회
+    @GetMapping("{novelId}")
+    public ResponseEntity<ResponseGetNovelDto> getNovel(@PathVariable long novelId,@AuthenticationPrincipal User user) {
+        return novelService.getNovel(novelId,user);
+    }
+
+    @GetMapping()
+    public ResponseEntity<ResponseGetNovelListDto> getAllNovels() {
+        return novelService.getNovelList();
     }
 }

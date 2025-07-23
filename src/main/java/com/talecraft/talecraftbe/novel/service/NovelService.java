@@ -71,24 +71,35 @@ public class NovelService {
          return new ResponseEntity<>(responsePatchNovelDto, HttpStatus.OK);
     }
 
-
+    //단건 조회
     @Transactional
     public ResponseEntity<ResponseGetNovelDto> getNovel(long novelId, User user) {
-        NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
-        ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
-        responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-        responseGetNovelDto.setTitle(novelEntity.getTitle());
-        responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
-        responseGetNovelDto.setSummary(novelEntity.getSummary());
-        responseGetNovelDto.setAvailability(novelEntity.getAvailability());
-        return new ResponseEntity<>(responseGetNovelDto, HttpStatus.OK);
+        try{
+            NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
+            //->Mapper 도입 고려
+            ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
+            responseGetNovelDto.setNovelId(novelEntity.getNovelId());
+            responseGetNovelDto.setTitle(novelEntity.getTitle());
+            responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
+            responseGetNovelDto.setSummary(novelEntity.getSummary());
+            responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+            return new ResponseEntity<>(responseGetNovelDto, HttpStatus.OK);
+            //
+        }catch(RuntimeException e){
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
+
+    //리스트 조회
+    //현재는 페이지네이션을 고려하지 않음(MVP)
     @Transactional
-    public ResponseEntity<ResponseGetListNovelDto> getNovelList( User user) {
+    public ResponseEntity<ResponseGetNovelListDto> getNovelList() {
         List<NovelEntity> novelEntityList = novelRepository.findAll();
-        ResponseGetListNovelDto responseGetListNovelDto = new ResponseGetListNovelDto();
-        return new ResponseEntity<>(responseGetListNovelDto,HttpStatus.OK);
+        ResponseGetNovelListDto responseGetNovelListDto = new ResponseGetNovelListDto();
+        responseGetNovelListDto.setNovelDtoList(novelEntityList);
+        return new ResponseEntity<>(responseGetNovelListDto,HttpStatus.OK);
     }
 
 }

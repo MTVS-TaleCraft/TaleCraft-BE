@@ -4,8 +4,10 @@ package com.talecraft.talecraftbe.novel.episode.controller;
 
 import com.talecraft.talecraftbe.novel.episode.dto.request.RequestPostEpisodeDto;
 import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseGetEpisodeDto;
+import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseGetEpisodeListDto;
 import com.talecraft.talecraftbe.novel.episode.dto.response.ResponsePostEpisodeDto;
 import com.talecraft.talecraftbe.novel.episode.service.EpisodeService;
+import org.hibernate.annotations.Comment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,14 +23,21 @@ public class EpisodeController {
 
   @PostMapping
   public ResponseEntity<ResponsePostEpisodeDto> postEpisode(@PathVariable long novelId, @RequestBody RequestPostEpisodeDto requestPostEpisodeDto) {
-      //입력값 검증 로직 추가예정.
+      //입력값 검증 로직 추가예정.(MVP 완성후)
       return episodeService.createEpisode(novelId,requestPostEpisodeDto);
   }
 
-/*
+  //단건 조회
   @GetMapping("/{episodeId}")
   public ResponseEntity<ResponseGetEpisodeDto> getEpisode(@PathVariable long episodeId) {
+      return episodeService.getEpisode(episodeId);
+  }
 
-  }*/
+  @GetMapping
+  public ResponseEntity<ResponseGetEpisodeListDto> getEpisode() {
+      return episodeService.getEpisodeList();
+  }
+
+
 
 }
