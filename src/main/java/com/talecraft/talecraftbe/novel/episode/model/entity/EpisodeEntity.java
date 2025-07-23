@@ -2,6 +2,10 @@ package com.talecraft.talecraftbe.novel.episode.model.entity;
 
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.swing.text.StyledEditorKit;
@@ -9,6 +13,9 @@ import java.util.Date;
 
 @Entity
 @Table(name = "episodes")
+@Builder
+@Getter
+@AllArgsConstructor
 public class EpisodeEntity {
     @Id
     private Long episodesId;

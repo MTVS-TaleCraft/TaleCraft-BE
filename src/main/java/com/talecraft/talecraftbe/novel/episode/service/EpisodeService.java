@@ -29,28 +29,28 @@ public class EpisodeService {
 
     @Transactional
     public ResponseEntity<ResponsePostEpisodeDto> createEpisode(long novelId, RequestPostEpisodeDto requestPostEpisodeDto) {
-        NovelEntity novelEntity =novelRepository.findById(novelId).orElseThrow(()->new RuntimeException("No episode with id " + novelId));
+        ResponsePostEpisodeDto responsePostEpisodeDto = null;
+        try {
+            NovelEntity novelEntity = novelRepository.findById(novelId).orElseThrow(() -> new RuntimeException("No episode with id " + novelId));
+            String note;
+            if (requestPostEpisodeDto.getNote() == null) {
+                note = "";
+            } else {
+                note = requestPostEpisodeDto.getNote();
+            }
+            //공지여부가 뭔지 모르겠어서 일단 추가 안함.
+            EpisodeEntity episodeEntity = new EpisodeEntity(requestPostEpisodeDto.getTitle(), requestPostEpisodeDto.getContent(), note);
+            responsePostEpisodeDto = new ResponsePostEpisodeDto();
 
-        String note;
 
-        if(requestPostEpisodeDto.getNote()==null){
-            note = "";
-        }else{
-            note = requestPostEpisodeDto.getNote();
-        }
-        //공지여부가 뭔지 모르겠어서 일단 추가 안함.
-        EpisodeEntity episodeEntity = new EpisodeEntity(requestPostEpisodeDto.getTitle(),requestPostEpisodeDto.getContent(),note);
-        ResponsePostEpisodeDto responsePostEpisodeDto = new ResponsePostEpisodeDto();
-
-     /*   try{
             episodeRepository.save(episodeEntity);
-            response.
+            responsePostEpisodeDto.setEpisodeId(episodeEntity.getEpisodesId());
+            return new ResponseEntity<>(responsePostEpisodeDto, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             System.out.println(e);
             System.out.println("Error creating episode");
+            return new ResponseEntity<>(responsePostEpisodeDto, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-*/
-        return new ResponseEntity<>(responsePostEpisodeDto, HttpStatus.CREATED);
     }
 
 

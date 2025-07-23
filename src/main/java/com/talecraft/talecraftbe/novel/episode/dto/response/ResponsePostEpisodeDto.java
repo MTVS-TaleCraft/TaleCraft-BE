@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ResponsePostEpisodeDto {
-    String episodeId;
+    Long episodeId;
     String message;
 }
