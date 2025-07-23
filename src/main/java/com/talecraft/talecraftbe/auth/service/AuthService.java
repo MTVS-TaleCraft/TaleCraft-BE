@@ -88,5 +88,21 @@ public class AuthService {
         cookie.setPath("/");
         response.addCookie(cookie);
     }
+
+    /**
+     * 로그아웃: JWT 쿠키 제거 및 SecurityContext 초기화
+     */
+    public void logout(HttpServletResponse response) {
+        // SecurityContext 초기화
+        SecurityContextHolder.clearContext();
+        
+        // JWT 쿠키 제거
+        Cookie cookie = new Cookie("JwtToken", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // 쿠키 즉시 만료
+        response.addCookie(cookie);
+    }
 }
 

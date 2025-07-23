@@ -40,4 +40,14 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", "로그인에 실패했습니다."));
         }
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(HttpServletResponse response) {
+        try {
+            authService.logout(response);
+            return ResponseEntity.ok(Map.of("message", "로그아웃이 완료되었습니다."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "로그아웃에 실패했습니다."));
+        }
+    }
 }
