@@ -1,6 +1,8 @@
 spring:
   application:
     name: TaleCraft-BE
+  config:
+    import: optional:file:.env[.properties]
 
   datasource:
     url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
@@ -17,16 +19,19 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
   mail:
-        host: smtp.gmail.com
-        port: 587
-        username: emflazlwm62@gmail.com
-        password: rjhx ujqo xlfg ryrn
-        properties:
-          mail.smtp.auth: true
-          mail.smtp.starttls.enable: true
+    host: smtp.gmail.com
+    port: 587
+    username: ${Address}
+    password: ${Email_Password}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 server:
-  port: 8080
+  port: 8081
+
+ai:
+  url: ${AI_PORT}
 
 security:
   jwt:
