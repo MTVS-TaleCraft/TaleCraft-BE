@@ -12,8 +12,8 @@ import java.util.List;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id", length = 20)
+    private String id;
 
     @Column(name = "user_name")
     private String userName;
@@ -33,11 +33,11 @@ public class User implements UserDetails {
 
     public User() {}
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

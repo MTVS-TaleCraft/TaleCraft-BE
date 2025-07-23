@@ -39,6 +39,11 @@ public class AuthService {
      * 회원가입: 이메일 인증 확인 후 USERS 테이블에 저장하고 SIGNED_UP = 1로 변경
      */
     public void signup(SignupRequest req) {
+        // 아이디 중복 검사
+        if (userRepo.existsById(req.userId())) {
+            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+        }
+        
         // 이메일 중복 검사
         if (userRepo.existsByEmail(req.email())) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
@@ -56,6 +61,7 @@ public class AuthService {
         
         // USERS 테이블에 회원 정보 저장 (authority_id = 1)
         User user = new User();
+        user.setId(req.userId());
         user.setUserName(req.userName());
         user.setEmail(req.email());
         user.setPassword(passwordEncoder.encode(req.password()));
@@ -67,11 +73,11 @@ public class AuthService {
     }
 
     /**
-     * 로그인: 이메일/비밀번호 인증, JWT 생성 후 쿠키에 담아 응답
+     * 로그인: 아이디/비밀번호 인증, JWT 생성 후 쿠키에 담아 응답
      */
     public void login(LoginRequest req, HttpServletResponse response) {
         UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(req.email(), req.password());
+                new UsernamePasswordAuthenticationToken(req.userId(), req.password());
         Authentication auth = authManager.authenticate(authToken);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
