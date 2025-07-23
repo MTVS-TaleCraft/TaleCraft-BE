@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Comment;
 
 @Entity
 @Table(name ="novels")
@@ -17,22 +18,26 @@ public class NovelEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(updatable = false, nullable = false)
+    @Comment("소설 ID")
     private long novelId;
 
     @Column(nullable = false)
+    @Comment("소설 제목")
     private String title;
 
     @Column
+    @Comment("소설 이미지")
     private String titleImage;
 
     @Column
+    @Comment("소설 개요")
     private String summary;
 
     @Column(nullable = false)
+    @Comment("소설 공개 설정")
     private Availability availability;
 
     public NovelEntity() {
-
     }
 
     @JoinColumn
@@ -41,14 +46,17 @@ public class NovelEntity {
 
     @Column
     @ColumnDefault("0")
+    @Comment("소설 연재 여부")
     boolean isFinished;
 
     @Column
     @ColumnDefault("0")
+    @Comment("소설 삭제 여부")
     boolean isDeleted;
 
     @Column
     @ColumnDefault("0")
+    @Comment("소설 금지 여부")
     boolean isBanned;
 
     public void updateIsBanned(boolean isBanned) {

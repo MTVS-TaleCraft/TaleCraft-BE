@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class NovelController {
     private final NovelService novelService;
 
+
     @Autowired
     public NovelController(NovelService novelService) {
         this.novelService = novelService;
