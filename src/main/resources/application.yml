@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -19,14 +19,14 @@ spring:
   mail:
         host: smtp.gmail.com
         port: 587
-        username: your_email@gmail.com
-        password: your_password
+        username: emflazlwm62@gmail.com
+        password: rjhx ujqo xlfg ryrn
         properties:
           mail.smtp.auth: true
           mail.smtp.starttls.enable: true
 
 server:
-  port: 8081
+  port: 8080
 
 security:
   jwt:

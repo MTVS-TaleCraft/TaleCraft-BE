@@ -10,7 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-@RestController("/api/novels/{novelId}")
+@RestController
+@RequestMapping("/api/novels/{novelId}")
 public class EpisodeController {
   private final EpisodeService episodeService;
 
@@ -24,10 +25,10 @@ public class EpisodeController {
       return episodeService.createEpisode(novelId,requestPostEpisodeDto);
   }
 
-
+/*
   @GetMapping("/{episodeId}")
   public ResponseEntity<ResponseGetEpisodeDto> getEpisode(@PathVariable long episodeId) {
 
-  }
+  }*/
 
 }
