@@ -10,6 +10,6 @@ import lombok.ToString;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AddAIResponseDTO {
-    private boolean success;
-    private String answer;
+    private boolean status;
+    private String response;
 }
