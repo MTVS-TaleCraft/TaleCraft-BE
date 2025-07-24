@@ -3,16 +3,15 @@ package com.talecraft.talecraftbe.novel.episode.controller;
 
 
 import com.talecraft.talecraftbe.novel.episode.dto.request.RequestPostEpisodeDto;
+import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseGetEpisodeDto;
 import com.talecraft.talecraftbe.novel.episode.dto.response.ResponsePostEpisodeDto;
 import com.talecraft.talecraftbe.novel.episode.service.EpisodeService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
-@RestController("/api/novels/{novelId}")
+@RestController
+@RequestMapping("/api/novels/{novelId}")
 public class EpisodeController {
   private final EpisodeService episodeService;
 
@@ -26,6 +25,10 @@ public class EpisodeController {
       return episodeService.createEpisode(novelId,requestPostEpisodeDto);
   }
 
+/*
+  @GetMapping("/{episodeId}")
+  public ResponseEntity<ResponseGetEpisodeDto> getEpisode(@PathVariable long episodeId) {
 
+  }*/
 
 }
