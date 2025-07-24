@@ -1,6 +1,11 @@
-/*
 package com.talecraft.talecraftbe.comment.dto.request;
 
-public class RequestPost {
+
+import lombok.Data;
+
+
+
+@Data
+public class RequestPostCommentDto {
+
 }
-*/

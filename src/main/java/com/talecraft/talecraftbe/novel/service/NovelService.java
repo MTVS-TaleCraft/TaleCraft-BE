@@ -102,7 +102,6 @@ public class NovelService {
             ResponseGetNovelListDto responseGetNovelListDto = new ResponseGetNovelListDto();
             //가독성개선방향찾기
             List<ResponseGetNovelDto> responseGetNovelDtoList = new ArrayList<>();
-
             for (NovelEntity novelEntity : novelEntityList) {
                 ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
                 responseGetNovelDto.setNovelId(novelEntity.getNovelId());

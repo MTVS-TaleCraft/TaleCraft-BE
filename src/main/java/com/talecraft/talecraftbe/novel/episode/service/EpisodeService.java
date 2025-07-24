@@ -2,6 +2,8 @@ package com.talecraft.talecraftbe.novel.episode.service;
 
 
 import com.talecraft.talecraftbe.novel.episode.dto.request.RequestPostEpisodeDto;
+import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseGetEpisodeDto;
+import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseGetEpisodeListDto;
 import com.talecraft.talecraftbe.novel.episode.dto.response.ResponsePostEpisodeDto;
 import com.talecraft.talecraftbe.novel.episode.model.entity.EpisodeEntity;
 import com.talecraft.talecraftbe.novel.episode.repository.EpisodeRepository;
@@ -54,8 +56,9 @@ public class EpisodeService {
     }
 
 
+    public ResponseEntity<ResponseGetEpisodeDto> getEpisode(long episodeId) {
+    }
 
-
-
-
+    public ResponseEntity<ResponseGetEpisodeListDto> getEpisodeList() {
+    }
 }
