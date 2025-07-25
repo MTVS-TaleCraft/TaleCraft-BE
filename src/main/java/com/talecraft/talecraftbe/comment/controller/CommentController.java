@@ -35,11 +35,11 @@ public class CommentController {
     Pageable pageable) {
         return commentService.getAllComment(novelId,pageable);
     }
-
+/*
     @PostMapping("/")
     public ResponseEntity<ResponsePostCommentDto> addComment(@RequestBody RequestPostCommentDto requestPostCommentDto, @AuthenticationPrincipal User user) {
         return commentService.addComment(requestPostCommentDto, user);
-    }
+    }*/
 /*
 
     @DeleteMapping

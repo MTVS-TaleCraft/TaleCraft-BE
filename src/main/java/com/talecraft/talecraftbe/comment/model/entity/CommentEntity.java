@@ -4,8 +4,10 @@ package com.talecraft.talecraftbe.comment.model.entity;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -15,6 +17,7 @@ import java.time.LocalDate;
 @Table(name = "comments")
 @Getter
 @Builder
+@AllArgsConstructor
 public class CommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

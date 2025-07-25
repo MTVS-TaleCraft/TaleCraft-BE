@@ -46,6 +46,7 @@ public class CommentService {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+/*
 
     public ResponseEntity<ResponsePostCommentDto> addComment(RequestPostCommentDto requestPostCommentDto, User user) {
         CommentEntity commentEntity = CommentEntity.builder()
@@ -58,5 +59,6 @@ public class CommentService {
     }
 
 */
+
 
 }
