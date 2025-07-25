@@ -56,9 +56,27 @@ public class EpisodeService {
     }
 
 
-    public ResponseEntity<ResponseGetEpisodeDto> getEpisode(long episodeId) {
+    public ResponseEntity<ResponseGetEpisodeDto> getEpisode(long episodeId,long novelId) {
+        try{
+            EpisodeEntity episodeEntity = episodeRepository.findById(episodeId).orElseThrow(() -> new RuntimeException("No episode with id " + episodeId));
+            ResponseGetEpisodeDto responseGetEpisodeDto = new ResponseGetEpisodeDto();
+            responseGetEpisodeDto.setEpisodeId(episodeEntity.getEpisodesId());
+            responseGetEpisodeDto.setTitle(episodeEntity.getTitle());
+            responseGetEpisodeDto.setContent(episodeEntity.getContent());
+            responseGetEpisodeDto.setNote(episodeEntity.getNote());
+            responseGetEpisodeDto.setCreateDate(episodeEntity.getCreatedDate());
+            responseGetEpisodeDto.setNovelId(novelId);
+            return new ResponseEntity<>(new ResponseGetEpisodeDto(), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(new ResponseGetEpisodeDto(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     public ResponseEntity<ResponseGetEpisodeListDto> getEpisodeList() {
+    }
+
+    public ResponseEntity<ResponsePostEpisodeDto> updateEpisode(RequestPostEpisodeDto requestPostEpisodeDto) {
+
     }
 }

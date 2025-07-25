@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api/novels/{novelId}")
+@RequestMapping("/api/novels/{novelId}/episodes")
 public class EpisodeController {
   private final EpisodeService episodeService;
 
@@ -28,16 +28,20 @@ public class EpisodeController {
   }
 
   //단건 조회
-  @GetMapping("/{episodeId}")
-  public ResponseEntity<ResponseGetEpisodeDto> getEpisode(@PathVariable long episodeId) {
-      return episodeService.getEpisode(episodeId);
+  @GetMapping("/{episodesId}")
+  public ResponseEntity<ResponseGetEpisodeDto> getEpisode(@PathVariable long episodeId,@PathVariable long novelId) {
+      return episodeService.getEpisode(episodeId,novelId);
   }
 
+  //복수 조회
   @GetMapping
   public ResponseEntity<ResponseGetEpisodeListDto> getEpisode() {
       return episodeService.getEpisodeList();
   }
 
-
-
+  //에피소드 수정
+  @PatchMapping("/{episodesId}")
+  public ResponseEntity<ResponsePostEpisodeDto> updateEpisode(@RequestBody RequestPostEpisodeDto requestPostEpisodeDto) {
+      return episodeService.updateEpisode(requestPostEpisodeDto);
+  }
 }
