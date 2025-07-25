@@ -46,17 +46,21 @@ public class CommentService {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-/*
-
     public ResponseEntity<ResponsePostCommentDto> addComment(RequestPostCommentDto requestPostCommentDto, User user) {
-        CommentEntity commentEntity = CommentEntity.builder()
-                                                    .user(user)
-                                                    .content(requestPostCommentDto.getContent())
-                                                    .novel();
-
-
-
+        try{
+            CommentEntity commentEntity = CommentEntity.builder()
+                    .content(requestPostCommentDto.getContent()).user(user).build();
+            commentRepository.save(commentEntity);
+            return new ResponseEntity<>(new ResponsePostCommentDto(commentEntity.getCommentId(),"댓글 등록 성공"), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+
+
+
+
+
 
 */
 
