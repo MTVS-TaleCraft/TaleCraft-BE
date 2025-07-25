@@ -18,9 +18,6 @@ import org.springframework.web.bind.annotation.*;
 public class AIController {
     private final AIService aiService;
 
-    @Value("${ai.url}")
-    private String alURL;
-
     public AIController(AIService aiService) {
         this.aiService = aiService;
     }
@@ -39,8 +36,7 @@ public class AIController {
         log.info("POST : /api/ai");
         log.info("requestDTO: {}", requestDTO);
 
-        String url = alURL + "/api/chat";
-        AddAIResponseDTO responseAIDTO = aiService.requestAI(requestDTO, url);
+        AddAIResponseDTO responseAIDTO = aiService.requestAI(requestDTO);
         if(requestDTO.isUseChatList())
             aiService.addChatMessage(requestDTO, responseAIDTO);
 
@@ -53,8 +49,8 @@ public class AIController {
         log.error(e.getMessage());
 
         AddAIResponseDTO responseAIDTO = new AddAIResponseDTO();
-        responseAIDTO.setSuccess(false);
-        responseAIDTO.setAnswer(e.getMessage());
+        responseAIDTO.setStatus(false);
+        responseAIDTO.setResponse(e.getMessage());
 
         return ResponseEntity.internalServerError().body(responseAIDTO);
     }

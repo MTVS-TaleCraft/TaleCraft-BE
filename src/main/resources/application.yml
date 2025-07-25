@@ -33,6 +33,12 @@ server:
 ai:
   url: ${AI_PORT}
 
+logging:
+  level:
+    com.talecraft.talecraftbe: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+
 security:
   jwt:
     secret-key: 0123456789ABCDEF0123456789ABCDEF
