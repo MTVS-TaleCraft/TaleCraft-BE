@@ -65,4 +65,8 @@ public class EpisodeEntity {
         this.is_notice = false;
         this.is_deleted = false;
     }
+
+    public void updateDeleted() {
+        this.is_deleted = true;
+    }
 }

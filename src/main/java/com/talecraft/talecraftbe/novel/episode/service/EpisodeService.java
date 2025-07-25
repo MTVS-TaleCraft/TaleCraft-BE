@@ -2,6 +2,7 @@ package com.talecraft.talecraftbe.novel.episode.service;
 
 
 import com.talecraft.talecraftbe.novel.episode.dto.request.RequestPostEpisodeDto;
+import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseDeleteEpisodeDto;
 import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseGetEpisodeDto;
 import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseGetEpisodeListDto;
 import com.talecraft.talecraftbe.novel.episode.dto.response.ResponsePostEpisodeDto;
@@ -55,7 +56,7 @@ public class EpisodeService {
         }
     }
 
-
+    @Transactional
     public ResponseEntity<ResponseGetEpisodeDto> getEpisode(long episodeId,long novelId) {
         try{
             EpisodeEntity episodeEntity = episodeRepository.findById(episodeId).orElseThrow(() -> new RuntimeException("No episode with id " + episodeId));
@@ -73,10 +74,29 @@ public class EpisodeService {
 
     }
 
+    @Transactional
     public ResponseEntity<ResponseGetEpisodeListDto> getEpisodeList() {
     }
 
-    public ResponseEntity<ResponsePostEpisodeDto> updateEpisode(RequestPostEpisodeDto requestPostEpisodeDto) {
+    @Transactional
+    public ResponseEntity<ResponsePostEpisodeDto> updateEpisode(RequestPostEpisodeDto requestPostEpisodeDto, long episodeId) {
+        try{
 
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(new ResponsePostEpisodeDto(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+    public ResponseEntity<ResponseDeleteEpisodeDto> deleteEpisode(long episodeId) {
+        try{
+            EpisodeEntity episodeEntity = episodeRepository.findById(episodeId).orElseThrow(() -> new RuntimeException("No episode with id " + episodeId));
+            episodeEntity.updateDeleted();
+            episodeRepository.save(episodeEntity);
+            return new ResponseEntity<>(new ResponseDeleteEpisodeDto("Deleted Success"), HttpStatus.OK);
+        }catch (RuntimeException e) {
+            return new ResponseEntity<>(new ResponseDeleteEpisodeDto("Deleted Fail"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

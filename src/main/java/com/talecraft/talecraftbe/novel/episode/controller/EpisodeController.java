@@ -3,6 +3,7 @@ package com.talecraft.talecraftbe.novel.episode.controller;
 
 
 import com.talecraft.talecraftbe.novel.episode.dto.request.RequestPostEpisodeDto;
+import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseDeleteEpisodeDto;
 import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseGetEpisodeDto;
 import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseGetEpisodeListDto;
 import com.talecraft.talecraftbe.novel.episode.dto.response.ResponsePostEpisodeDto;
@@ -41,7 +42,12 @@ public class EpisodeController {
 
   //에피소드 수정
   @PatchMapping("/{episodesId}")
-  public ResponseEntity<ResponsePostEpisodeDto> updateEpisode(@RequestBody RequestPostEpisodeDto requestPostEpisodeDto) {
-      return episodeService.updateEpisode(requestPostEpisodeDto);
+  public ResponseEntity<ResponsePostEpisodeDto> updateEpisode(@RequestBody RequestPostEpisodeDto requestPostEpisodeDto,@PathVariable long episodeId) {
+      return episodeService.updateEpisode(requestPostEpisodeDto,episodeId);
+  }
+
+  @DeleteMapping("/{episodeId}")
+    public ResponseEntity<ResponseDeleteEpisodeDto> deleteEpisode(@PathVariable long episodeId) {
+      return episodeService.deleteEpisode(episodeId);
   }
 }
