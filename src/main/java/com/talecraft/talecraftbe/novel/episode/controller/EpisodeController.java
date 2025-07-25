@@ -3,13 +3,13 @@ package com.talecraft.talecraftbe.novel.episode.controller;
 
 
 import com.talecraft.talecraftbe.novel.episode.dto.request.RequestPostEpisodeDto;
-import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseDeleteEpisodeDto;
-import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseGetEpisodeDto;
-import com.talecraft.talecraftbe.novel.episode.dto.response.ResponseGetEpisodeListDto;
-import com.talecraft.talecraftbe.novel.episode.dto.response.ResponsePostEpisodeDto;
+import com.talecraft.talecraftbe.novel.episode.dto.request.RequestUpdateEpisodeDto;
+import com.talecraft.talecraftbe.novel.episode.dto.response.*;
 import com.talecraft.talecraftbe.novel.episode.service.EpisodeService;
+import com.talecraft.talecraftbe.user.entity.User;
 import org.hibernate.annotations.Comment;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -22,14 +22,16 @@ public class EpisodeController {
       this.episodeService = episodeService;
   }
 
+
+  //userId
   @PostMapping
-  public ResponseEntity<ResponsePostEpisodeDto> postEpisode(@PathVariable long novelId, @RequestBody RequestPostEpisodeDto requestPostEpisodeDto) {
+  public ResponseEntity<ResponsePostEpisodeDto> postEpisode(@PathVariable long novelId, @RequestBody RequestPostEpisodeDto requestPostEpisodeDto, @AuthenticationPrincipal User user) {
       //입력값 검증 로직 추가예정.(MVP 완성후)
-      return episodeService.createEpisode(novelId,requestPostEpisodeDto);
+      return episodeService.createEpisode(novelId,requestPostEpisodeDto,user);
   }
 
   //단건 조회
-  @GetMapping("/{episodesId}")
+  @GetMapping("/{episodeId}")
   public ResponseEntity<ResponseGetEpisodeDto> getEpisode(@PathVariable long episodeId,@PathVariable long novelId) {
       return episodeService.getEpisode(episodeId,novelId);
   }
@@ -41,9 +43,9 @@ public class EpisodeController {
   }
 
   //에피소드 수정
-  @PatchMapping("/{episodesId}")
-  public ResponseEntity<ResponsePostEpisodeDto> updateEpisode(@RequestBody RequestPostEpisodeDto requestPostEpisodeDto,@PathVariable long episodeId) {
-      return episodeService.updateEpisode(requestPostEpisodeDto,episodeId);
+  @PatchMapping("/{episodeId}")
+  public ResponseEntity<ResponseUpdateEpisodeDto> updateEpisode(@RequestBody RequestUpdateEpisodeDto requestUpdateEpisodeDto, @PathVariable long episodeId, @AuthenticationPrincipal User user) {
+      return episodeService.updateEpisode(requestUpdateEpisodeDto,episodeId);
   }
 
   @DeleteMapping("/{episodeId}")
