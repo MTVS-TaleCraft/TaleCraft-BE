@@ -5,7 +5,7 @@ WORKDIR /home/gradle/project
 
 COPY --chown=gradle:gradle . .
 
-RUN gradle build --no-daemon -x test
+RUN gradle build --no-daemon
 
 # 2단계: 실행 스테이지
 FROM eclipse-temurin:17-jdk

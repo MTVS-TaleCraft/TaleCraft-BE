@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.swing.text.StyledEditorKit;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -36,7 +37,7 @@ public class EpisodeEntity {
     private String note;
 
     @CreatedDate
-    private Date createdDate;
+    private LocalDate createdDate;
     
     @Column
     private Boolean is_notice;

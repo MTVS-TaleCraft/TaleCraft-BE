@@ -26,6 +26,7 @@ public class NovelService {
 
     @Transactional
     public ResponseEntity<ResponsePostNovelDto> createNovel(RequestPostNovelDto requestPostNovelDto, User user) {
+        try {
         NovelEntity novelEntity = NovelEntity.builder()
                 .title(requestPostNovelDto.getTitle())
                 .titleImage(requestPostNovelDto.getTitleImage())
@@ -37,8 +38,15 @@ public class NovelService {
 
         ResponsePostNovelDto responsePostNovelDto = new ResponsePostNovelDto();
         responsePostNovelDto.setNovelId(novelEntity.getNovelId());
+        responsePostNovelDto.setMessage("Novel created");
+            return new ResponseEntity<>(responsePostNovelDto, HttpStatus.CREATED);
+        }
+        catch (RuntimeException e){
+            //더강력한로깅으로 바꿀것
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
-        return new ResponseEntity<>(responsePostNovelDto, HttpStatus.CREATED);
     }
 
     //EPISODE까지 지우게해야함. (나중에 EPISODE구현완료시)
