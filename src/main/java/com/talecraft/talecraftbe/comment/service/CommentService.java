@@ -1,12 +1,11 @@
 package com.talecraft.talecraftbe.comment.service;
 
 import com.talecraft.talecraftbe.comment.dto.request.RequestPostCommentDto;
-import com.talecraft.talecraftbe.comment.dto.response.ResponseGetCommentItemDto;
-import com.talecraft.talecraftbe.comment.dto.response.ResponseGetCommentListDto;
-import com.talecraft.talecraftbe.comment.dto.response.ResponsePostCommentDto;
+import com.talecraft.talecraftbe.comment.dto.response.*;
 import com.talecraft.talecraftbe.comment.exception.NovelNotFoundException;
 import com.talecraft.talecraftbe.comment.model.entity.CommentEntity;
 import com.talecraft.talecraftbe.comment.repository.CommentRepository;
+import com.talecraft.talecraftbe.novel.episode.dto.request.RequestUpdateEpisodeDto;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import com.talecraft.talecraftbe.user.entity.User;
@@ -57,12 +56,32 @@ public class CommentService {
         }
     }
 
+    public ResponseEntity<ResponseDeleteCommentDto> deleteComment(User user,long commentId) {
+        try{
+            CommentEntity commentEntity = commentRepository.findById(commentId).orElseThrow();
+            commentEntity.upDateDeleted(true);
+            commentRepository.save(commentEntity);
+            return new ResponseEntity<>(new ResponseDeleteCommentDto("delete success"), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<ResponseUpdateCommentDto> updateComment(RequestUpdateEpisodeDto requestUpdateEpisodeDto, User user,long commentId) {
+        try{
+            CommentEntity commentEntity = commentRepository.findById(commentId).orElseThrow();
+            commentEntity.updateComment(requestUpdateEpisodeDto);
+            commentRepository.save(commentEntity);
+            return new ResponseEntity<>(new ResponseUpdateCommentDto(commentId,"댓글 업데이트 성공"), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 
 
 
 
-
-*/
 
 
 }

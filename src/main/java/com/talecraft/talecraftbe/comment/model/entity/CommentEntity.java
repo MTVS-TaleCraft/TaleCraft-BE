@@ -51,4 +51,8 @@ public class CommentEntity {
     public CommentEntity() {
 
     }
+
+    public boolean upDateDeleted(boolean status) {
+        this.isDeleted = status;
+    }
 }

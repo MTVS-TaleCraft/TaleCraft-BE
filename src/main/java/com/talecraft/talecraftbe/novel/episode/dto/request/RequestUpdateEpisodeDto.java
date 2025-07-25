@@ -15,4 +15,5 @@ public class RequestUpdateEpisodeDto {
     private String note;
     private boolean isNotice;
     private boolean isDeleted;
+
 }
