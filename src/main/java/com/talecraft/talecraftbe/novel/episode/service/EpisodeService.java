@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class EpisodeService {
 
@@ -79,7 +81,11 @@ public class EpisodeService {
     @Transactional
     public ResponseEntity<ResponseGetEpisodeListDto> getEpisodeList() {
         try{
-
+            List<EpisodeEntity> episodeEntities = episodeRepository.findAll();
+            List<ResponseGetEpisodeItemsDto> episodeItemsDtos = episodeEntities.stream()
+                    .map(ResponseGetEpisodeItemsDto::new)
+                    .toList();
+            return new ResponseEntity<>(new ResponseGetEpisodeListDto(), HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(new ResponseGetEpisodeListDto(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

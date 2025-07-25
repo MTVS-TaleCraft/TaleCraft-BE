@@ -1,13 +1,19 @@
 package com.talecraft.talecraftbe.comment.controller;
 
 
+import com.talecraft.talecraftbe.comment.dto.request.RequestPostCommentDto;
 import com.talecraft.talecraftbe.comment.dto.response.ResponseGetCommentItemDto;
 import com.talecraft.talecraftbe.comment.dto.response.ResponseGetCommentListDto;
+import com.talecraft.talecraftbe.comment.dto.response.ResponsePostCommentDto;
+import com.talecraft.talecraftbe.comment.dto.response.ResponseUpdateCommentDto;
 import com.talecraft.talecraftbe.comment.service.CommentService;
+import com.talecraft.talecraftbe.novel.episode.dto.request.RequestUpdateEpisodeDto;
 import com.talecraft.talecraftbe.user.entity.User;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +36,21 @@ public class CommentController {
         return commentService.getAllComment(novelId,pageable);
     }
 
+    @PostMapping("/")
+    public ResponseEntity<ResponsePostCommentDto> addComment(@RequestBody RequestPostCommentDto requestPostCommentDto, @AuthenticationPrincipal User user) {
+        return commentService.addComment(requestPostCommentDto, user);
+    }
+/*
+
+    @DeleteMapping
+    public ResponseEntity<ResponseDeleteCommentDto> deleteComment(@AuthenticationPrincipal User user){
+        return commentService.deleteComment(user);
+    }
+
     @PostMapping
-    public
+    public ResponseEntity<ResponseUpdateCommentDto> updateComment(@RequestBody RequestUpdateEpisodeDto requestUpdateEpisodeDto, @AuthenticationPrincipal User user){
+        return commentService.updateComment(user);
+    }
+*/
+
 }
