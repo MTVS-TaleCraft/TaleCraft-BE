@@ -41,9 +41,12 @@ public class SecurityConfig {
                         // 1) 회원가입·로그인 (인증 불필요)
                         .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/find-userid").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/find-password").permitAll()
 
                         // 2) 이메일 인증 API
                         .requestMatchers(HttpMethod.POST, "/api/verification/send").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/verification/verify").permitAll()
                         .requestMatchers(HttpMethod.GET,  "/api/verification").permitAll()
 
                         // 3) 퍼블릭 리소스

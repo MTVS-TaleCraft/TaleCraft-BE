@@ -3,6 +3,10 @@ package com.talecraft.talecraftbe.auth.controller;
 import com.talecraft.talecraftbe.auth.dto.LoginRequest;
 import com.talecraft.talecraftbe.auth.dto.SignupRequest;
 import com.talecraft.talecraftbe.auth.dto.UpdateUserRequest;
+import com.talecraft.talecraftbe.auth.dto.FindUserIdRequest;
+import com.talecraft.talecraftbe.auth.dto.FindPasswordRequest;
+import com.talecraft.talecraftbe.auth.dto.FindUserIdResponse;
+import com.talecraft.talecraftbe.auth.dto.FindAccountResponse;
 import com.talecraft.talecraftbe.auth.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -61,6 +65,18 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<Map<String, String>> getProfile() {
+        try {
+            Map<String, String> userInfo = authService.getCurrentUserInfo();
+            return ResponseEntity.ok(userInfo);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "사용자 정보 조회에 실패했습니다."));
+        }
+    }
+
     @PatchMapping("/profile")
     public ResponseEntity<Map<String, String>> updateProfile(@RequestBody @Valid UpdateUserRequest req) {
         try {
@@ -70,6 +86,30 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", "프로필 수정에 실패했습니다."));
+        }
+    }
+
+    @PostMapping("/find-userid")
+    public ResponseEntity<FindUserIdResponse> findUserId(@RequestBody @Valid FindUserIdRequest req) {
+        try {
+            String userId = authService.findUserId(req);
+            return ResponseEntity.ok(new FindUserIdResponse(true, "아이디를 찾았습니다.", userId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new FindUserIdResponse(false, e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new FindUserIdResponse(false, "아이디 찾기에 실패했습니다.", null));
+        }
+    }
+
+    @PostMapping("/find-password")
+    public ResponseEntity<FindAccountResponse> findPassword(@RequestBody @Valid FindPasswordRequest req) {
+        try {
+            authService.findPassword(req);
+            return ResponseEntity.ok(new FindAccountResponse(true, "임시 비밀번호가 이메일로 발송되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new FindAccountResponse(false, e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new FindAccountResponse(false, "비밀번호 찾기에 실패했습니다."));
         }
     }
 }

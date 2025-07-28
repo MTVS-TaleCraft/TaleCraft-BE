@@ -23,17 +23,16 @@ public class EmailVerificationController {
             @RequestBody @Valid EmailVerificationRequest req) {
 
         service.createAndSendToken(req.email());
-        return ResponseEntity.ok(new EmailVerificationResponse(true, "인증 메일이 발송되었습니다."));
+        return ResponseEntity.ok(new EmailVerificationResponse(true, "인증 코드가 이메일로 발송되었습니다."));
     }
 
-    @GetMapping
+    @PostMapping("/verify")
     public ResponseEntity<EmailVerificationResponse> verify(
-            @RequestParam String code,
-            @RequestParam String email) {
+            @RequestBody @Valid EmailVerificationRequest req) {
 
-        boolean verified = service.verify(code, email);
+        boolean verified = service.verify(req.code(), req.email());
         if (verified) {
-            return ResponseEntity.ok(new EmailVerificationResponse(true, "이메일 인증이 완료되었습니다. 이제 회원가입을 진행할 수 있습니다."));
+            return ResponseEntity.ok(new EmailVerificationResponse(true, "이메일 인증이 완료되었습니다."));
         }
         return ResponseEntity
                 .badRequest()

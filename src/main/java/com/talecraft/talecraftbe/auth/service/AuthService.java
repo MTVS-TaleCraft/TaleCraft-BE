@@ -3,12 +3,16 @@ package com.talecraft.talecraftbe.auth.service;
 import com.talecraft.talecraftbe.auth.dto.LoginRequest;
 import com.talecraft.talecraftbe.auth.dto.SignupRequest;
 import com.talecraft.talecraftbe.auth.dto.UpdateUserRequest;
+import com.talecraft.talecraftbe.auth.dto.FindUserIdRequest;
+import com.talecraft.talecraftbe.auth.dto.FindPasswordRequest;
 import com.talecraft.talecraftbe.user.entity.User;
 import com.talecraft.talecraftbe.user.repository.UserRepository;
 import com.talecraft.talecraftbe.auth.config.JwtProvider;
 import com.talecraft.talecraftbe.verification.service.EmailVerificationService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,6 +23,9 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
+import java.util.Map;
+
 @Service
 public class AuthService {
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
@@ -27,17 +34,20 @@ public class AuthService {
     private final AuthenticationManager authManager;
     private final JwtProvider jwtProvider;
     private final EmailVerificationService emailVerificationService;
+    private final JavaMailSender mailSender;
 
     public AuthService(UserRepository userRepo,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authManager,
                        JwtProvider jwtProvider,
-                       EmailVerificationService emailVerificationService) {
+                       EmailVerificationService emailVerificationService,
+                       JavaMailSender mailSender) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.authManager = authManager;
         this.jwtProvider = jwtProvider;
         this.emailVerificationService = emailVerificationService;
+        this.mailSender = mailSender;
     }
 
     /**
@@ -133,6 +143,29 @@ public class AuthService {
     }
 
     /**
+     * 현재 로그인된 사용자 정보 조회
+     */
+    public Map<String, String> getCurrentUserInfo() {
+        // 현재 로그인된 사용자 정보 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+        
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String currentUserId = userDetails.getUsername();
+        
+        User currentUser = userRepo.findById(currentUserId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        
+        return Map.of(
+            "userId", currentUser.getId(),
+            "userName", currentUser.getUserName(),
+            "email", currentUser.getEmail()
+        );
+    }
+
+    /**
      * 프로필 수정: 현재 로그인된 사용자의 정보 수정
      */
     public void updateProfile(UpdateUserRequest req) {
@@ -176,6 +209,61 @@ public class AuthService {
         }
         
         userRepo.save(currentUser);
+    }
+
+    /**
+     * 아이디 찾기: 이메일로 사용자를 찾아 아이디 반환
+     */
+    public String findUserId(FindUserIdRequest req) {
+        // 이메일로 사용자 찾기
+        User user = userRepo.findByEmail(req.email())
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일로 등록된 계정을 찾을 수 없습니다."));
+        
+        return user.getId();
+    }
+
+    /**
+     * 비밀번호 찾기: 이메일로 임시 비밀번호 발송
+     */
+    public void findPassword(FindPasswordRequest req) {
+        // 이메일과 아이디로 사용자 찾기
+        User user = userRepo.findByEmailAndId(req.email(), req.userId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 정보로 등록된 계정을 찾을 수 없습니다."));
+        
+        // 임시 비밀번호 생성 (8자리 영문+숫자)
+        String tempPassword = generateTempPassword();
+        
+        // 비밀번호 업데이트
+        user.setPassword(passwordEncoder.encode(tempPassword));
+        userRepo.save(user);
+        
+        // 이메일 발송
+        SimpleMailMessage mail = new SimpleMailMessage();
+        mail.setTo(req.email());
+        mail.setSubject("[TaleCraft] 임시 비밀번호 안내");
+        mail.setText("안녕하세요!\n\n" +
+                "TaleCraft 임시 비밀번호를 안내드립니다.\n\n" +
+                "임시 비밀번호: " + tempPassword + "\n\n" +
+                "보안을 위해 로그인 후 반드시 비밀번호를 변경해주세요.\n" +
+                "본인이 요청하지 않은 경우 이 메일을 무시하세요.\n\n" +
+                "감사합니다.\n" +
+                "TaleCraft 팀");
+        mailSender.send(mail);
+    }
+
+    /**
+     * 임시 비밀번호 생성 (8자리 영문+숫자)
+     */
+    private String generateTempPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(8);
+        
+        for (int i = 0; i < 8; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        
+        return sb.toString();
     }
 }
 
