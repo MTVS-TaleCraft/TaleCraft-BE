@@ -2,10 +2,8 @@ package com.talecraft.talecraftbe.comment.controller;
 
 
 import com.talecraft.talecraftbe.comment.dto.request.RequestPostCommentDto;
-import com.talecraft.talecraftbe.comment.dto.response.ResponseGetCommentItemDto;
-import com.talecraft.talecraftbe.comment.dto.response.ResponseGetCommentListDto;
-import com.talecraft.talecraftbe.comment.dto.response.ResponsePostCommentDto;
-import com.talecraft.talecraftbe.comment.dto.response.ResponseUpdateCommentDto;
+import com.talecraft.talecraftbe.comment.dto.request.RequestUpdateCommentDto;
+import com.talecraft.talecraftbe.comment.dto.response.*;
 import com.talecraft.talecraftbe.comment.service.CommentService;
 import com.talecraft.talecraftbe.novel.episode.dto.request.RequestUpdateEpisodeDto;
 import com.talecraft.talecraftbe.user.entity.User;
@@ -40,17 +38,17 @@ public class CommentController {
     public ResponseEntity<ResponsePostCommentDto> addComment(@RequestBody RequestPostCommentDto requestPostCommentDto, @AuthenticationPrincipal User user) {
         return commentService.addComment(requestPostCommentDto, user);
     }
-/*
 
-    @DeleteMapping
-    public ResponseEntity<ResponseDeleteCommentDto> deleteComment(@AuthenticationPrincipal User user){
-        return commentService.deleteComment(user);
+
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<ResponseDeleteCommentDto> deleteComment(@AuthenticationPrincipal User user,@PathVariable long commentId) {
+        return commentService.deleteComment(user,commentId);
     }
 
-    @PostMapping
-    public ResponseEntity<ResponseUpdateCommentDto> updateComment(@RequestBody RequestUpdateEpisodeDto requestUpdateEpisodeDto, @AuthenticationPrincipal User user){
-        return commentService.updateComment(user);
+    @PostMapping("/comments/{commentId}")
+    public ResponseEntity<ResponseUpdateCommentDto> updateComment(@RequestBody RequestUpdateCommentDto requestUpdateCommentDto, @AuthenticationPrincipal User user, @PathVariable long commentId) {
+        return commentService.updateComment(requestUpdateCommentDto,user,commentId);
     }
-*/
+
 
 }

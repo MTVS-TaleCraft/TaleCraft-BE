@@ -9,11 +9,11 @@ import lombok.RequiredArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
 public class RequestUpdateEpisodeDto {
     private String title;
     private String content;
     private String note;
     private boolean isNotice;
     private boolean isDeleted;
+
 }

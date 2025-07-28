@@ -1,9 +1,12 @@
 package com.talecraft.talecraftbe.comment.model.entity;
 
 
+import com.talecraft.talecraftbe.comment.dto.request.RequestUpdateCommentDto;
+import com.talecraft.talecraftbe.novel.episode.dto.request.RequestUpdateEpisodeDto;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.annotations.Comment;
@@ -15,6 +18,7 @@ import java.time.LocalDate;
 @Table(name = "comments")
 @Getter
 @Builder
+@AllArgsConstructor
 public class CommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -47,5 +51,13 @@ public class CommentEntity {
 
     public CommentEntity() {
 
+    }
+
+    public void updateDeleted(boolean status) {
+        this.isDeleted = status;
+    }
+
+    public void updateComment(RequestUpdateCommentDto requestUpdateCommentDto) {
+        this.content = requestUpdateCommentDto.getContent();
     }
 }

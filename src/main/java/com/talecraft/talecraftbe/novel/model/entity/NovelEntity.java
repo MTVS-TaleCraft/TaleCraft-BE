@@ -25,11 +25,11 @@ public class NovelEntity {
     @Comment("소설 제목")
     private String title;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     @Comment("소설 이미지")
     private String titleImage;
 
-    @Column
+    @Column(length=1000)
     @Comment("소설 개요")
     private String summary;
 
