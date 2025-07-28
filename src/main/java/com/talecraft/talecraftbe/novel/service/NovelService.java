@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -71,24 +72,52 @@ public class NovelService {
          return new ResponseEntity<>(responsePatchNovelDto, HttpStatus.OK);
     }
 
-
+    //단건 조회
     @Transactional
     public ResponseEntity<ResponseGetNovelDto> getNovel(long novelId, User user) {
-        NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
-        ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
-        responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-        responseGetNovelDto.setTitle(novelEntity.getTitle());
-        responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
-        responseGetNovelDto.setSummary(novelEntity.getSummary());
-        responseGetNovelDto.setAvailability(novelEntity.getAvailability());
-        return new ResponseEntity<>(responseGetNovelDto, HttpStatus.OK);
+        try{
+            NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
+            //->Mapper 도입 고려
+            ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
+            responseGetNovelDto.setNovelId(novelEntity.getNovelId());
+            responseGetNovelDto.setTitle(novelEntity.getTitle());
+            responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
+            responseGetNovelDto.setSummary(novelEntity.getSummary());
+            responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+            return new ResponseEntity<>(responseGetNovelDto, HttpStatus.OK);
+            //
+        }catch(RuntimeException e){
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
+
+    //리스트 조회
+    //현재는 페이지네이션을 고려하지 않음(MVP)
     @Transactional
-    public ResponseEntity<ResponseGetListNovelDto> getNovelList( User user) {
-        List<NovelEntity> novelEntityList = novelRepository.findAll();
-        ResponseGetListNovelDto responseGetListNovelDto = new ResponseGetListNovelDto();
-        return new ResponseEntity<>(responseGetListNovelDto,HttpStatus.OK);
+    public ResponseEntity<ResponseGetNovelListDto> getNovelList() {
+        try{
+            List<NovelEntity> novelEntityList = novelRepository.findAll();
+            ResponseGetNovelListDto responseGetNovelListDto = new ResponseGetNovelListDto();
+            //가독성개선방향찾기
+            List<ResponseGetNovelDto> responseGetNovelDtoList = new ArrayList<>();
+            for (NovelEntity novelEntity : novelEntityList) {
+                ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
+                responseGetNovelDto.setNovelId(novelEntity.getNovelId());
+                responseGetNovelDto.setTitle(novelEntity.getTitle());
+                responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
+                responseGetNovelDto.setSummary(novelEntity.getSummary());
+                responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+                responseGetNovelDtoList.add(responseGetNovelDto);
+            }
+            responseGetNovelListDto.setNovelList(responseGetNovelDtoList);
+
+            return new ResponseEntity<>(responseGetNovelListDto,HttpStatus.OK);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 }
