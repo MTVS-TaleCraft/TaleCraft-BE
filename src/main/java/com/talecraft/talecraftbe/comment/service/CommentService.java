@@ -30,19 +30,24 @@ public class CommentService {
     }
 
     public ResponseEntity<ResponseGetCommentListDto> getAllComment(Long novelId, Pageable pageable) {
-        NovelEntity novelEntity = novelRepository.findById(novelId).orElseThrow(() -> new NovelNotFoundException(novelId));
-        Page<CommentEntity> commentPage = commentRepository.findByNovel(novelEntity, pageable);
-        List<ResponseGetCommentItemDto> commentDtos = commentPage.stream()
-                .map(ResponseGetCommentItemDto::new)
-                .toList();
+        try{
+            NovelEntity novelEntity = novelRepository.findById(novelId).orElseThrow(() -> new NovelNotFoundException(novelId));
+            Page<CommentEntity> commentPage = commentRepository.findByNovel(novelEntity, pageable);
+            List<ResponseGetCommentItemDto> commentDtos = commentPage.stream()
+                    .map(ResponseGetCommentItemDto::new)
+                    .toList();
 
-        ResponseGetCommentListDto responseDto = new ResponseGetCommentListDto(
-                commentDtos,
-                commentPage.getTotalPages(),
-                commentPage.getTotalElements()
-        );
+            ResponseGetCommentListDto responseDto = new ResponseGetCommentListDto(
+                    commentDtos,
+                    commentPage.getTotalPages(),
+                    commentPage.getTotalElements()
+            );
 
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+            return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     public ResponseEntity<ResponsePostCommentDto> addComment(RequestPostCommentDto requestPostCommentDto, User user) {
@@ -61,7 +66,7 @@ public class CommentService {
             CommentEntity commentEntity = commentRepository.findById(commentId).orElseThrow();
             commentEntity.updateDeleted(true);
             commentRepository.save(commentEntity);
-            return new ResponseEntity<>(new ResponseDeleteCommentDto("delete success"), HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseDeleteCommentDto("삭제 성공"), HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
