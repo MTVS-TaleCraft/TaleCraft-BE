@@ -14,6 +14,8 @@ import java.util.List;
 @EqualsAndHashCode
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AddAIRequestDTO {
+    private Long episodeId;
+    private Long chatListId;
     private boolean useChatList;
     private String question;
     private List<String> beforeQuestionList;

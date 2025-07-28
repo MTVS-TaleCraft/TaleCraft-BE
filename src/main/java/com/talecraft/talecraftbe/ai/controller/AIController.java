@@ -1,16 +1,16 @@
 package com.talecraft.talecraftbe.ai.controller;
 
 import com.talecraft.talecraftbe.ai.dto.request.AddAIRequestDTO;
-import com.talecraft.talecraftbe.ai.dto.request.FindAIRequestDTO;
 import com.talecraft.talecraftbe.ai.dto.response.AddAIResponseDTO;
 import com.talecraft.talecraftbe.ai.dto.response.FindAIResponseDTO;
 import com.talecraft.talecraftbe.ai.exception.AIRequestFailException;
 import com.talecraft.talecraftbe.ai.service.AIService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -22,11 +22,17 @@ public class AIController {
         this.aiService = aiService;
     }
 
-    @GetMapping
-    public ResponseEntity<?> getAi(@ModelAttribute FindAIRequestDTO requestDTO) {
+    @GetMapping("/{episodeId}")
+    public ResponseEntity<?> getAi(@PathVariable Long episodeId, @RequestParam Long chatListId) {
         // AI와 대화한 기록 출력
-        log.info("GET : /api/ai");
-        FindAIResponseDTO chatList = aiService.getChatList(requestDTO);
+        log.info("GET : /api/ai/{}" , episodeId);
+        if(episodeId == null && chatListId == null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", false);
+            response.put("message", "에피소드ID 또는 챗리스트ID 중 하나는 필수로 주어야 합니다!");
+            return ResponseEntity.badRequest().body(response);
+        }
+        FindAIResponseDTO chatList = aiService.getChatList(episodeId, chatListId);
 
         return ResponseEntity.ok().body(chatList);
     }
@@ -36,9 +42,13 @@ public class AIController {
         log.info("POST : /api/ai");
         log.info("requestDTO: {}", requestDTO);
 
+        if(requestDTO.isUseChatList() && requestDTO.getEpisodeId() != null) {
+            requestDTO.setChatListId(aiService.addChatList(requestDTO));
+        }
         AddAIResponseDTO responseAIDTO = aiService.requestAI(requestDTO);
-        if(requestDTO.isUseChatList())
+        if(requestDTO.getChatListId() != null) {
             aiService.addChatMessage(requestDTO, responseAIDTO);
+        }
 
         log.info("responseAIDTO: {}", responseAIDTO);
         return ResponseEntity.ok().body(responseAIDTO);
