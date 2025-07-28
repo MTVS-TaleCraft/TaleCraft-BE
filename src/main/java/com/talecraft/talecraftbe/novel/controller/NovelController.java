@@ -38,7 +38,7 @@ public class NovelController {
     }
 
     //단건 조회
-    @GetMapping("{novelId}")
+    @GetMapping("/{novelId}")
     public ResponseEntity<ResponseGetNovelDto> getNovel(@PathVariable long novelId,@AuthenticationPrincipal User user) {
         return novelService.getNovel(novelId,user);
     }

@@ -48,6 +48,8 @@ public class SecurityConfig {
 
                         // 3) 퍼블릭 리소스
                         .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/api/novels/**").permitAll()
+                        .requestMatchers("/api/novels").permitAll()
 
                         // 4) 나머지 요청은 인증 필요
                         .anyRequest().authenticated()
