@@ -2,6 +2,7 @@ package com.talecraft.talecraftbe.comment.controller;
 
 
 import com.talecraft.talecraftbe.comment.dto.request.RequestPostCommentDto;
+import com.talecraft.talecraftbe.comment.dto.request.RequestUpdateCommentDto;
 import com.talecraft.talecraftbe.comment.dto.response.*;
 import com.talecraft.talecraftbe.comment.service.CommentService;
 import com.talecraft.talecraftbe.novel.episode.dto.request.RequestUpdateEpisodeDto;
@@ -45,8 +46,8 @@ public class CommentController {
     }
 
     @PostMapping("/comments/{commentId}")
-    public ResponseEntity<ResponseUpdateCommentDto> updateComment(@RequestBody RequestUpdateEpisodeDto requestUpdateEpisodeDto, @AuthenticationPrincipal User user,@PathVariable long commentId) {
-        return commentService.updateComment(requestUpdateEpisodeDto,user,commentId);
+    public ResponseEntity<ResponseUpdateCommentDto> updateComment(@RequestBody RequestUpdateCommentDto requestUpdateCommentDto, @AuthenticationPrincipal User user, @PathVariable long commentId) {
+        return commentService.updateComment(requestUpdateCommentDto,user,commentId);
     }
 
 

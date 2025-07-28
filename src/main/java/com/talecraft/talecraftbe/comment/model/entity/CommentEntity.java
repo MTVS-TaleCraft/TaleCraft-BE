@@ -1,13 +1,14 @@
 package com.talecraft.talecraftbe.comment.model.entity;
 
 
+import com.talecraft.talecraftbe.comment.dto.request.RequestUpdateCommentDto;
+import com.talecraft.talecraftbe.novel.episode.dto.request.RequestUpdateEpisodeDto;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -52,7 +53,11 @@ public class CommentEntity {
 
     }
 
-    public boolean upDateDeleted(boolean status) {
+    public void updateDeleted(boolean status) {
         this.isDeleted = status;
+    }
+
+    public void updateComment(RequestUpdateCommentDto requestUpdateCommentDto) {
+        this.content = requestUpdateCommentDto.getContent();
     }
 }
