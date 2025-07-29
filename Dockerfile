@@ -7,6 +7,7 @@ COPY --chown=gradle:gradle . .
 
 RUN gradle build --no-daemon -x test
 
+
 # 2단계: 실행 스테이지
 FROM eclipse-temurin:17-jdk
 
