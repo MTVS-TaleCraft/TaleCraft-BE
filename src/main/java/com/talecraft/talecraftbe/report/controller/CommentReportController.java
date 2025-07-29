@@ -22,7 +22,6 @@ public class CommentReportController {
     public CommentReportController(CommentReportService commentReportService) {
         this.commentReportService = commentReportService;
     }
-
     /**
      * 댓글 신고 생성
      */
