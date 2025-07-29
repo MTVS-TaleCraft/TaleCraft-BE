@@ -81,7 +81,9 @@ public class NovelService {
             //->Mapper 도입 고려
             ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
             responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-            responseGetNovelDto.setUserId(novelEntity.getUser().getId());
+            if(novelEntity.getUser()!=null){
+                responseGetNovelDto.setUserId(novelEntity.getUser().getId());
+            }
             responseGetNovelDto.setTitle(novelEntity.getTitle());
             responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
             responseGetNovelDto.setSummary(novelEntity.getSummary());
@@ -130,7 +132,9 @@ public class NovelService {
             for (NovelEntity novelEntity : novelEntityList) {
                 ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
                 responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-                responseGetNovelDto.setUserId(novelEntity.getUser().getId());
+                if(novelEntity.getUser()!=null){
+                    responseGetNovelDto.setUserId(novelEntity.getUser().getId());
+                }
                 responseGetNovelDto.setTitle(novelEntity.getTitle());
                 responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
                 responseGetNovelDto.setSummary(novelEntity.getSummary());
@@ -157,7 +161,9 @@ public class NovelService {
             for (NovelEntity novelEntity : novelEntityList) {
                 ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
                 responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-                responseGetNovelDto.setUserId(novelEntity.getUser().getId());
+                if(novelEntity.getUser()!=null){
+                    responseGetNovelDto.setUserId(novelEntity.getUser().getId());
+                }
                 responseGetNovelDto.setTitle(novelEntity.getTitle());
                 responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
                 responseGetNovelDto.setSummary(novelEntity.getSummary());
