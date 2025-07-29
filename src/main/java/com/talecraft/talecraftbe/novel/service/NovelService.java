@@ -11,8 +11,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -52,7 +54,7 @@ public class NovelService {
     //EPISODE까지 지우게해야함. (나중에 EPISODE구현완료시)
     //
     @Transactional
-    public ResponseEntity<ResponseDeleteNovelDto> deleteNovel(long novelId, User user) {
+    public ResponseEntity<ResponseDeleteNovelDto> deleteNovel(long novelId,@AuthenticationPrincipal User user) {
         NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
         novelEntity.updateIsBanned(true);
         novelRepository.save(novelEntity);
@@ -61,7 +63,7 @@ public class NovelService {
     }
 
 
-    public ResponseEntity<ResponsePatchNovelDto> updateNovel(RequestPatchNovelDto requestPatchNovelDto, long novelId,User user) {
+    public ResponseEntity<ResponsePatchNovelDto> updateNovel(RequestPatchNovelDto requestPatchNovelDto, long novelId,@AuthenticationPrincipal User user) {
          NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
          novelEntity.updateTitleImage(requestPatchNovelDto.getTitleImage());
          novelEntity.updateSummary(requestPatchNovelDto.getSummary());
@@ -71,24 +73,109 @@ public class NovelService {
          return new ResponseEntity<>(responsePatchNovelDto, HttpStatus.OK);
     }
 
-
+    //단건 조회
     @Transactional
-    public ResponseEntity<ResponseGetNovelDto> getNovel(long novelId, User user) {
-        NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
-        ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
-        responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-        responseGetNovelDto.setTitle(novelEntity.getTitle());
-        responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
-        responseGetNovelDto.setSummary(novelEntity.getSummary());
-        responseGetNovelDto.setAvailability(novelEntity.getAvailability());
-        return new ResponseEntity<>(responseGetNovelDto, HttpStatus.OK);
+    public ResponseEntity<ResponseGetNovelDto> getNovel(long novelId, @AuthenticationPrincipal User user) {
+        try{
+            NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
+            //->Mapper 도입 고려
+            ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
+            responseGetNovelDto.setNovelId(novelEntity.getNovelId());
+            if(novelEntity.getUser()!=null){
+                responseGetNovelDto.setUserId(novelEntity.getUser().getId());
+            }
+            responseGetNovelDto.setTitle(novelEntity.getTitle());
+            responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
+            responseGetNovelDto.setSummary(novelEntity.getSummary());
+            responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+            return new ResponseEntity<>(responseGetNovelDto, HttpStatus.OK);
+            //
+        }catch(RuntimeException e){
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
+    //내 글만 단건 조회
     @Transactional
-    public ResponseEntity<ResponseGetListNovelDto> getNovelList( User user) {
-        List<NovelEntity> novelEntityList = novelRepository.findAll();
-        ResponseGetListNovelDto responseGetListNovelDto = new ResponseGetListNovelDto();
-        return new ResponseEntity<>(responseGetListNovelDto,HttpStatus.OK);
+    public ResponseEntity<ResponseGetNovelDto> getMyNovel(long novelId, @AuthenticationPrincipal User user) {
+        try{
+            NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
+            if(novelEntity.getUser().equals(user)) {
+                //->Mapper 도입 고려
+                ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
+                responseGetNovelDto.setNovelId(novelEntity.getNovelId());
+                responseGetNovelDto.setTitle(novelEntity.getTitle());
+                responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
+                responseGetNovelDto.setSummary(novelEntity.getSummary());
+                responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+                return new ResponseEntity<>(responseGetNovelDto, HttpStatus.OK);
+                //
+            }else{
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        }catch(RuntimeException e){
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
+    //리스트 조회
+    //현재는 페이지네이션을 고려하지 않음(MVP)
+    @Transactional
+    public ResponseEntity<ResponseGetNovelListDto> getNovelList() {
+        try{
+            List<NovelEntity> novelEntityList = novelRepository.findAll();
+            ResponseGetNovelListDto responseGetNovelListDto = new ResponseGetNovelListDto();
+            //가독성개선방향찾기
+            List<ResponseGetNovelDto> responseGetNovelDtoList = new ArrayList<>();
+            for (NovelEntity novelEntity : novelEntityList) {
+                ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
+                responseGetNovelDto.setNovelId(novelEntity.getNovelId());
+                if(novelEntity.getUser()!=null){
+                    responseGetNovelDto.setUserId(novelEntity.getUser().getId());
+                }
+                responseGetNovelDto.setTitle(novelEntity.getTitle());
+                responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
+                responseGetNovelDto.setSummary(novelEntity.getSummary());
+                responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+                responseGetNovelDtoList.add(responseGetNovelDto);
+            }
+            responseGetNovelListDto.setNovelList(responseGetNovelDtoList);
+
+            return new ResponseEntity<>(responseGetNovelListDto,HttpStatus.OK);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    //내 작품만 조회
+    @Transactional
+    public ResponseEntity<ResponseGetNovelListDto> getMyNovelList(@AuthenticationPrincipal User user) {
+        try{
+            List<NovelEntity> novelEntityList = novelRepository.findAllByUser(user);
+            ResponseGetNovelListDto responseGetNovelListDto = new ResponseGetNovelListDto();
+            //가독성개선방향찾기
+            List<ResponseGetNovelDto> responseGetNovelDtoList = new ArrayList<>();
+            for (NovelEntity novelEntity : novelEntityList) {
+                ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
+                responseGetNovelDto.setNovelId(novelEntity.getNovelId());
+                if(novelEntity.getUser()!=null){
+                    responseGetNovelDto.setUserId(novelEntity.getUser().getId());
+                }
+                responseGetNovelDto.setTitle(novelEntity.getTitle());
+                responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
+                responseGetNovelDto.setSummary(novelEntity.getSummary());
+                responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+                responseGetNovelDtoList.add(responseGetNovelDto);
+            }
+            responseGetNovelListDto.setNovelList(responseGetNovelDtoList);
+
+            return new ResponseEntity<>(responseGetNovelListDto,HttpStatus.OK);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 }

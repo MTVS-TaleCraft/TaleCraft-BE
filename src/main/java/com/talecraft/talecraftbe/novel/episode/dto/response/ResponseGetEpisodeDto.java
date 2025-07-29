@@ -1,5 +1,6 @@
 package com.talecraft.talecraftbe.novel.episode.dto.response;
 
+import com.talecraft.talecraftbe.novel.episode.model.entity.EpisodeEntity;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -13,4 +14,6 @@ public class ResponseGetEpisodeDto {
     int view;
     String note;
     LocalDate createDate;
+
+
 }
