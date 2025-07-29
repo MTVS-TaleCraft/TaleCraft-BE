@@ -43,8 +43,24 @@ public class NovelController {
         return novelService.getNovel(novelId,user);
     }
 
+    //내 작품 단건 조회
+    @GetMapping("/{novelId}/my")
+    public ResponseEntity<ResponseGetNovelDto> getMyNovel(@PathVariable long novelId,@AuthenticationPrincipal User user) {
+        return novelService.getMyNovel(novelId,user);
+    }
+
+    //전체 조회
     @GetMapping()
     public ResponseEntity<ResponseGetNovelListDto> getAllNovels() {
         return novelService.getNovelList();
     }
+
+    //내 작품 전체 조회
+    @GetMapping("/my")
+    public ResponseEntity<ResponseGetNovelListDto> getMyAllNovels(@AuthenticationPrincipal User user) {
+        return novelService.getMyNovelList(user);
+    }
+
+
+
 }
