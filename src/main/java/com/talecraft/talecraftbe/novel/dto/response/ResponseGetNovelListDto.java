@@ -1,7 +1,12 @@
 package com.talecraft.talecraftbe.novel.dto.response;
 
-public class ResponseGetListNovelDto {
-    private ResponseGetNovelDto content;
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+public class ResponseGetNovelListDto {
+    private List<ResponseGetNovelDto> novelList;
     private int page;
     private int pageSize;
     private int totalElements;

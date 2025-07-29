@@ -18,10 +18,10 @@ public class CommentReportController {
     private static final Logger logger = LoggerFactory.getLogger(CommentReportController.class);
     private final CommentReportService commentReportService;
 
+
     public CommentReportController(CommentReportService commentReportService) {
         this.commentReportService = commentReportService;
     }
-
     /**
      * 댓글 신고 생성
      */

@@ -1,16 +1,15 @@
 package com.talecraft.talecraftbe.novel.episode.model.entity;
 
 
+import com.talecraft.talecraftbe.novel.episode.dto.request.RequestUpdateEpisodeDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Comment;
 import org.springframework.data.annotation.CreatedDate;
 
-import javax.swing.text.StyledEditorKit;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Table(name = "episodes")
@@ -19,31 +18,40 @@ import java.util.Date;
 @AllArgsConstructor
 public class EpisodeEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Comment("소설 화수 ID")
     private Long episodesId;
 
     @ManyToOne
     private EpisodeEntity episode;
 
     @Column
+    @Comment("소설 화수 제목")
     private String title;
 
     @Column
+    @Comment("소설 화수 내용")
     private String content;
 
     @Column
+    @Comment("조회수")
     private Integer view;
 
     @Column
+    @Comment("공지")
     private String note;
 
     @CreatedDate
+    @Comment("생성일")
     private LocalDate createdDate;
     
     @Column
-    private Boolean is_notice;
+    @Comment("공지 여부")
+    private Boolean isNotice;
     
     @Column
-    private Boolean is_deleted;
+    @Comment("소설 화수 삭제 여부")
+    private Boolean isDeleted;
 
     public EpisodeEntity() {
     }
@@ -52,7 +60,19 @@ public class EpisodeEntity {
         this.title = title;
         this.content = content;
         this.note = note;
-        this.is_notice = false;
-        this.is_deleted = false;
+        this.isNotice = false;
+        this.isDeleted = false;
+    }
+
+    public void updateDeleted() {
+        this.isDeleted = true;
+    }
+
+    public void updateEpisode(RequestUpdateEpisodeDto dto) {
+        this.title = dto.getTitle();
+        this.content = dto.getContent();
+        this.note = dto.getNote();
+        this.isDeleted = dto.isDeleted();
+        this.isNotice = dto.isNotice();
     }
 }

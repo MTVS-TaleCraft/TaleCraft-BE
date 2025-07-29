@@ -1,0 +1,54 @@
+name: build
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up Temurin JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    - name: Grant execute permission for Gradle
+      run: chmod +x gradlew
+
+    - name: Build with out Test
+      run: ./gradlew build -x test
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build Docker image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/talecraft:latest .
+    - name: Push Docker image to Docker Hub
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/talecraft:latest
+
+  deploy:
+   needs: build
+   runs-on: ubuntu-latest
+   steps:
+    - uses: actions/checkout@v4
+
+    - name: Write private key
+      run: |
+        echo "${{ secrets.EC2_PRIVATE_SECRET }}" > ec2-talecraft-be.pem
+        chmod 400 ec2-talecraft-be.pem
+
+    - name: SSH and run deploy script
+      run: ssh -i ec2-talecraft-be.pem -o StrictHostKeyChecking=no ec2-user@ec2-52-78-166-172.ap-northeast-2.compute.amazonaws.com 'bash /home/ec2-user/script.sh'
+
+
