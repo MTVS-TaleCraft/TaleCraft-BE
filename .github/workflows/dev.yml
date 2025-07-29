@@ -46,5 +46,5 @@ jobs:
         run:
           echo "${{ secrets.EC2_PRIVATE_SECRET }}" > ec2-talecraft-be.pem
           chmod 400 ec2-talecraft-be.pem
-          ssh -i "ec2-talecraft-be.pem" ec2-user@ec2-52-78-166-172.ap-northeast-2.compute.amazonaws.com 'bash /home/ec2-user/deploy.sh'
+          ssh -i "ec2-talecraft-be.pem" ec2-user@ec2-52-78-166-172.ap-northeast-2.compute.amazonaws.com 'bash /home/ec2-user/script.sh'
 
