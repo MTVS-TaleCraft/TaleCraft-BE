@@ -18,6 +18,7 @@ public class CommentReportController {
     private static final Logger logger = LoggerFactory.getLogger(CommentReportController.class);
     private final CommentReportService commentReportService;
 
+
     public CommentReportController(CommentReportService commentReportService) {
         this.commentReportService = commentReportService;
     }
