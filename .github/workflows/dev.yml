@@ -38,19 +38,14 @@ jobs:
         docker push ${{ secrets.DOCKER_USERNAME }}/talecraft:latest
 
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master' }}
-    runs-on: ubuntu-latest
     needs: build
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: execute remote ssh & deploy backend server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd /home/ec2-user/easystudyBE/
-            docker pull ${{ secrets.DOCKER_USERNAME }}/talecraft:latest
-            docker-compose down
-            docker-compose up --build -d
+        run: |
+          echo "hello world"
+          echo "${{ secrets.EC2_PRIVATE_SECRET }}" > ec2-talecraft-be.pem
+          chmod 400 ec2-talecraft-be.pem
+          ssh -i "ec2-talecraft-be.pem" ec2-user@ec2-52-78-166-172.ap-northeast-2.compute.amazonaws.com 'bash /home/ec2-user/deploy.sh'
+
