@@ -20,11 +20,11 @@ public enum AIOptions {
     public static String getAIURL(AIOptions options, String url) {
         switch (options) {
             case NORMAL:
-                return url + "/api/ai";
+                return url + "/api/chat";
             case SPELL_CHECK:
                 return url + "/api/spell-check";
             case STORY_EXTENSION:
-                 return url + "/api/story-extension";
+                 return url + "/api/extension";
             case MAKE_NAME:
                 return url + "/api/make-name";
             default:
