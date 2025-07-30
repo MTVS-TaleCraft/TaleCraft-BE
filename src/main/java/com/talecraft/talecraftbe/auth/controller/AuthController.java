@@ -7,6 +7,7 @@ import com.talecraft.talecraftbe.auth.dto.FindUserIdRequest;
 import com.talecraft.talecraftbe.auth.dto.FindPasswordRequest;
 import com.talecraft.talecraftbe.auth.dto.FindUserIdResponse;
 import com.talecraft.talecraftbe.auth.dto.FindAccountResponse;
+import com.talecraft.talecraftbe.auth.dto.UserDetailResponse;
 import com.talecraft.talecraftbe.auth.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -66,8 +68,15 @@ public class AuthController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<Map<String, String>> getProfile() {
+    public ResponseEntity<?> getProfile(@RequestParam(required = false) String targetUserId) {
         try {
+            // 관리자가 특정 사용자 정보를 조회하는 경우
+            if (targetUserId != null && !targetUserId.isEmpty()) {
+                UserDetailResponse userDetail = authService.getUserDetail(targetUserId);
+                return ResponseEntity.ok(userDetail);
+            }
+            
+            // 일반적인 현재 사용자 정보 조회
             Map<String, String> userInfo = authService.getCurrentUserInfo();
             return ResponseEntity.ok(userInfo);
         } catch (IllegalArgumentException e) {
@@ -112,4 +121,17 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new FindAccountResponse(false, "비밀번호 찾기에 실패했습니다."));
         }
     }
+
+    @GetMapping("/profile/users")
+    public ResponseEntity<List<UserDetailResponse>> getAllUsers() {
+        try {
+            List<UserDetailResponse> users = authService.getAllUsers();
+            return ResponseEntity.ok(users);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 }

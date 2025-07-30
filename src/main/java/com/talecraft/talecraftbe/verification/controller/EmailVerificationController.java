@@ -22,8 +22,8 @@ public class EmailVerificationController {
     public ResponseEntity<EmailVerificationResponse> send(
             @RequestBody @Valid EmailVerificationRequest req) {
 
-        service.createAndSendToken(req.email());
-        return ResponseEntity.ok(new EmailVerificationResponse(true, "인증 코드가 이메일로 발송되었습니다."));
+        String code = service.createAndSendToken(req.email());
+        return ResponseEntity.ok(new EmailVerificationResponse(true, "인증 코드가 이메일로 발송되었습니다.", code));
     }
 
     @PostMapping("/verify")
@@ -32,11 +32,11 @@ public class EmailVerificationController {
 
         boolean verified = service.verify(req.code(), req.email());
         if (verified) {
-            return ResponseEntity.ok(new EmailVerificationResponse(true, "이메일 인증이 완료되었습니다."));
+            return ResponseEntity.ok(new EmailVerificationResponse(true, "이메일 인증이 완료되었습니다.", null));
         }
         return ResponseEntity
                 .badRequest()
-                .body(new EmailVerificationResponse(false, "인증 코드가 유효하지 않거나 만료되었습니다."));
+                .body(new EmailVerificationResponse(false, "인증 코드가 유효하지 않거나 만료되었습니다.", null));
     }
 }
 
