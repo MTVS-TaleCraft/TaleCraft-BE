@@ -54,6 +54,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/novels/**").permitAll()
                         .requestMatchers("/api/novels").permitAll()
 
+                        // 3-1) swagger 리소스
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api-docs/**").permitAll()
+
                         // 4) 나머지 요청은 인증 필요
                         .anyRequest().authenticated()
                 )

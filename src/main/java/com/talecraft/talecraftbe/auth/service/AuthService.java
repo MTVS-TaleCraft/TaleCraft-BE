@@ -108,7 +108,8 @@ public class AuthService {
         
         Cookie cookie = new Cookie("JwtToken", jwt);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        // http 환경에서 swagger를 사용하기 위해 임시 주석 처리, 추후 배포할 때 주석 풀기
+//        cookie.setSecure(true);
         cookie.setPath("/");
         response.addCookie(cookie);
         logger.info("JWT cookie set");
