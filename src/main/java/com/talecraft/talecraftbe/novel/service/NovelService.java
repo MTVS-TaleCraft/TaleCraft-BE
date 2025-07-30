@@ -8,6 +8,7 @@ import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import com.talecraft.talecraftbe.user.entity.User;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class NovelService {
     private final NovelRepository novelRepository;
@@ -81,9 +83,7 @@ public class NovelService {
             //->Mapper 도입 고려
             ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
             responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-            if(novelEntity.getUser()!=null){
-                responseGetNovelDto.setUserId(novelEntity.getUser().getId());
-            }
+            setAuthor(novelEntity, responseGetNovelDto);
             responseGetNovelDto.setTitle(novelEntity.getTitle());
             responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
             responseGetNovelDto.setSummary(novelEntity.getSummary());
@@ -106,6 +106,7 @@ public class NovelService {
                 ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
                 responseGetNovelDto.setNovelId(novelEntity.getNovelId());
                 responseGetNovelDto.setTitle(novelEntity.getTitle());
+                setAuthor(novelEntity, responseGetNovelDto);
                 responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
                 responseGetNovelDto.setSummary(novelEntity.getSummary());
                 responseGetNovelDto.setAvailability(novelEntity.getAvailability());
@@ -132,9 +133,7 @@ public class NovelService {
             for (NovelEntity novelEntity : novelEntityList) {
                 ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
                 responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-                if(novelEntity.getUser()!=null){
-                    responseGetNovelDto.setUserId(novelEntity.getUser().getId());
-                }
+                setAuthor(novelEntity, responseGetNovelDto);
                 responseGetNovelDto.setTitle(novelEntity.getTitle());
                 responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
                 responseGetNovelDto.setSummary(novelEntity.getSummary());
@@ -161,9 +160,7 @@ public class NovelService {
             for (NovelEntity novelEntity : novelEntityList) {
                 ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
                 responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-                if(novelEntity.getUser()!=null){
-                    responseGetNovelDto.setUserId(novelEntity.getUser().getId());
-                }
+                setAuthor(novelEntity, responseGetNovelDto);
                 responseGetNovelDto.setTitle(novelEntity.getTitle());
                 responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
                 responseGetNovelDto.setSummary(novelEntity.getSummary());
@@ -178,4 +175,14 @@ public class NovelService {
         }
 
     }
+
+    public void setAuthor(NovelEntity novelEntity,ResponseGetNovelDto response) {
+        if(novelEntity.getUser()!=null){
+            response.setAuthor(novelEntity.getUser().getUserName());
+        }else{
+            log.info("user is null");
+            response.setAuthor("No Author");
+        }
+    }
+
 }
