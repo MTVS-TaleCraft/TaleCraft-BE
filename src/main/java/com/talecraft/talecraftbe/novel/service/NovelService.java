@@ -8,6 +8,7 @@ import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import com.talecraft.talecraftbe.user.entity.User;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class NovelService {
     private final NovelRepository novelRepository;
@@ -81,9 +84,7 @@ public class NovelService {
             //->Mapper 도입 고려
             ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
             responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-            if(novelEntity.getUser()!=null){
-                responseGetNovelDto.setUserId(novelEntity.getUser().getId());
-            }
+            setAuthor(novelEntity, responseGetNovelDto);
             responseGetNovelDto.setTitle(novelEntity.getTitle());
             responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
             responseGetNovelDto.setSummary(novelEntity.getSummary());
@@ -106,6 +107,7 @@ public class NovelService {
                 ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
                 responseGetNovelDto.setNovelId(novelEntity.getNovelId());
                 responseGetNovelDto.setTitle(novelEntity.getTitle());
+                setAuthor(novelEntity, responseGetNovelDto);
                 responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
                 responseGetNovelDto.setSummary(novelEntity.getSummary());
                 responseGetNovelDto.setAvailability(novelEntity.getAvailability());
@@ -123,18 +125,51 @@ public class NovelService {
     //리스트 조회
     //현재는 페이지네이션을 고려하지 않음(MVP)
     @Transactional
-    public ResponseEntity<ResponseGetNovelListDto> getNovelList() {
+    public ResponseEntity<ResponseGetNovelListDto> getNovelList(String keyword, String type) {
+        try {
+            List<NovelEntity> novelEntityList;
+
+            // 검색 조건 분기
+            if (type == null || keyword == null || keyword.isBlank()) {
+                novelEntityList = novelRepository.findAll();
+            } else {
+                novelEntityList = switch (type) {
+                    case "title" -> novelRepository.findAllByTitle(keyword);
+                    case "userName" -> novelRepository.findAllByUserUserName(keyword);
+                    case "userId" -> novelRepository.findAllByUserId(keyword);
+                    default -> throw new IllegalArgumentException("유효하지 않은 검색 타입입니다: " + type);
+                };
+            }
+
+            List<ResponseGetNovelDto> responseGetNovelDtoList = novelEntityList.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+
+            ResponseGetNovelListDto response = new ResponseGetNovelListDto();
+            response.setNovelList(responseGetNovelDtoList);
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+            throw new RuntimeException("소설 검색 중 오류 발생", e);
+        }
+
+    }
+
+
+
+    //내 작품만 조회
+    @Transactional
+    public ResponseEntity<ResponseGetNovelListDto> getMyNovelList(@AuthenticationPrincipal User user) {
         try{
-            List<NovelEntity> novelEntityList = novelRepository.findAll();
+            List<NovelEntity> novelEntityList = novelRepository.findAllByUser(user);
             ResponseGetNovelListDto responseGetNovelListDto = new ResponseGetNovelListDto();
             //가독성개선방향찾기
             List<ResponseGetNovelDto> responseGetNovelDtoList = new ArrayList<>();
             for (NovelEntity novelEntity : novelEntityList) {
                 ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
                 responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-                if(novelEntity.getUser()!=null){
-                    responseGetNovelDto.setUserId(novelEntity.getUser().getId());
-                }
+                setAuthor(novelEntity, responseGetNovelDto);
                 responseGetNovelDto.setTitle(novelEntity.getTitle());
                 responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
                 responseGetNovelDto.setSummary(novelEntity.getSummary());
@@ -150,32 +185,23 @@ public class NovelService {
 
     }
 
-    //내 작품만 조회
-    @Transactional
-    public ResponseEntity<ResponseGetNovelListDto> getMyNovelList(@AuthenticationPrincipal User user) {
-        try{
-            List<NovelEntity> novelEntityList = novelRepository.findAllByUser(user);
-            ResponseGetNovelListDto responseGetNovelListDto = new ResponseGetNovelListDto();
-            //가독성개선방향찾기
-            List<ResponseGetNovelDto> responseGetNovelDtoList = new ArrayList<>();
-            for (NovelEntity novelEntity : novelEntityList) {
-                ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
-                responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-                if(novelEntity.getUser()!=null){
-                    responseGetNovelDto.setUserId(novelEntity.getUser().getId());
-                }
-                responseGetNovelDto.setTitle(novelEntity.getTitle());
-                responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
-                responseGetNovelDto.setSummary(novelEntity.getSummary());
-                responseGetNovelDto.setAvailability(novelEntity.getAvailability());
-                responseGetNovelDtoList.add(responseGetNovelDto);
-            }
-            responseGetNovelListDto.setNovelList(responseGetNovelDtoList);
-
-            return new ResponseEntity<>(responseGetNovelListDto,HttpStatus.OK);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+    private void setAuthor(NovelEntity novelEntity,ResponseGetNovelDto response) {
+        if(novelEntity.getUser()!=null){
+            response.setAuthor(novelEntity.getUser().getUserName());
+        }else{
+            log.info("user is null");
+            response.setAuthor("No Author");
         }
+    }
 
+    private ResponseGetNovelDto convertToDto(NovelEntity novelEntity) {
+        ResponseGetNovelDto dto = new ResponseGetNovelDto();
+        dto.setNovelId(novelEntity.getNovelId());
+        setAuthor(novelEntity, dto);
+        dto.setTitle(novelEntity.getTitle());
+        dto.setTitleImage(novelEntity.getTitleImage());
+        dto.setSummary(novelEntity.getSummary());
+        dto.setAvailability(novelEntity.getAvailability());
+        return dto;
     }
 }

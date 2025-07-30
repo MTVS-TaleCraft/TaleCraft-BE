@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ResponseGetNovelDto {
     private long novelId;
-    private String userId;
+    private String author;
     private String title;
     private String titleImage;
     private String summary;
