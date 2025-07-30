@@ -11,10 +11,12 @@ import java.util.List;
 @ToString
 public class FindAIResponseDTO {
     private boolean status;
-    private List<ChatMessageResponseDTO> chatMessages;
+    private String message;
+    private List<ChatListResponseDTO> chatList;
 
-    public FindAIResponseDTO(List<ChatMessageResponseDTO> responseDTOList) {
+    public FindAIResponseDTO(List<ChatListResponseDTO> responseDTOList) {
         this.status = true;
-        this.chatMessages = responseDTOList;
+        this.message = "성공!";
+        this.chatList = responseDTOList;
     }
 }
