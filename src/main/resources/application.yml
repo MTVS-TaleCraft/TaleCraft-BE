@@ -57,3 +57,8 @@ security:
     secret-key: 0123456789ABCDEF0123456789ABCDEF
     token-validity-ms: 3600000
 
+
+cloud:
+  aws:
+    region:
+      static: ap-northeast-2

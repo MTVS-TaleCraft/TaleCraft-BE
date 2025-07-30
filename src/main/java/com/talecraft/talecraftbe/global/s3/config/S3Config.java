@@ -14,18 +14,20 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 @Configuration
 public class S3Config {
 
+    Region region = Region.of("ap-northeast-2");
+
     @Bean
     public S3Client s3Client() {
         return S3Client.builder()
-                .region(Region.of("ap-northeast-2"))
+                .region(region)
                 .build();
     }
 
 
     @Bean
-    public S3Presigner s3Presigner(AwsRegionProvider regionProvider) {
+    public S3Presigner s3Presigner() {
         return S3Presigner.builder()
-                .region(regionProvider.getRegion())
+                .region(region)
                 .build();
     }
 }
