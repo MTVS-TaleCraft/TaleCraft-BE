@@ -9,6 +9,7 @@ import com.talecraft.talecraftbe.comment.repository.CommentRepository;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import com.talecraft.talecraftbe.user.entity.User;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ public class CommentService {
         this.novelRepository = novelRepository;
     }
 
+    @Transactional
     public ResponseEntity<ResponseGetCommentListDto> getAllComment(Long novelId, Pageable pageable) {
         try{
             NovelEntity novelEntity = novelRepository.findById(novelId).orElseThrow(() -> new NovelNotFoundException(novelId));
@@ -50,6 +52,7 @@ public class CommentService {
 
     }
 
+    @Transactional
     public ResponseEntity<ResponsePostCommentDto> addComment(RequestPostCommentDto requestPostCommentDto, User user) {
         try{
             CommentEntity commentEntity = CommentEntity.builder()
@@ -61,6 +64,7 @@ public class CommentService {
         }
     }
 
+    @Transactional
     public ResponseEntity<ResponseDeleteCommentDto> deleteComment(User user,long commentId) {
         try{
             CommentEntity commentEntity = commentRepository.findById(commentId).orElseThrow();
@@ -72,6 +76,7 @@ public class CommentService {
         }
     }
 
+    @Transactional
     public ResponseEntity<ResponseUpdateCommentDto> updateComment(RequestUpdateCommentDto requestUpdateCommentDto, User user, long commentId) {
         try{
             CommentEntity commentEntity = commentRepository.findById(commentId).orElseThrow();
@@ -81,7 +86,6 @@ public class CommentService {
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
-
     }
 
 

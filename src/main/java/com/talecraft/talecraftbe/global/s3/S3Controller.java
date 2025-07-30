@@ -1,7 +1,7 @@
 package com.talecraft.talecraftbe.global.s3;
 
 import com.talecraft.talecraftbe.global.s3.dto.request.ImageUrlDto;
-import com.talecraft.talecraftbe.global.s3.dto.imageUrlDto;
+
 import com.talecraft.talecraftbe.user.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +19,11 @@ public class S3Controller {
     }
 
 /*
+
     @PostMapping("/image/upload")
     public ResponseEntity<Integer> imageUpload(@RequestBody ImageUrlDto image, @AuthenticationPrincipal User user) {
         s3Service.uploadFile(image);
-    }*/
+    }
+
+*/
 }
