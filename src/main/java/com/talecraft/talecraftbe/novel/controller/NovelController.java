@@ -51,8 +51,8 @@ public class NovelController {
 
     //전체 조회
     @GetMapping()
-    public ResponseEntity<ResponseGetNovelListDto> getAllNovels() {
-        return novelService.getNovelList();
+    public ResponseEntity<ResponseGetNovelListDto> getAllNovels(@RequestParam("value") String keyword,@RequestParam(value="type", required=false) String type) {
+            return novelService.getNovelList(keyword,type);
     }
 
     //내 작품 전체 조회

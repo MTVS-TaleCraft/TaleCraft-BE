@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -124,30 +125,38 @@ public class NovelService {
     //리스트 조회
     //현재는 페이지네이션을 고려하지 않음(MVP)
     @Transactional
-    public ResponseEntity<ResponseGetNovelListDto> getNovelList() {
-        try{
-            List<NovelEntity> novelEntityList = novelRepository.findAll();
-            ResponseGetNovelListDto responseGetNovelListDto = new ResponseGetNovelListDto();
-            //가독성개선방향찾기
-            List<ResponseGetNovelDto> responseGetNovelDtoList = new ArrayList<>();
-            for (NovelEntity novelEntity : novelEntityList) {
-                ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
-                responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-                setAuthor(novelEntity, responseGetNovelDto);
-                responseGetNovelDto.setTitle(novelEntity.getTitle());
-                responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
-                responseGetNovelDto.setSummary(novelEntity.getSummary());
-                responseGetNovelDto.setAvailability(novelEntity.getAvailability());
-                responseGetNovelDtoList.add(responseGetNovelDto);
-            }
-            responseGetNovelListDto.setNovelList(responseGetNovelDtoList);
+    public ResponseEntity<ResponseGetNovelListDto> getNovelList(String keyword, String type) {
+        try {
+            List<NovelEntity> novelEntityList;
 
-            return new ResponseEntity<>(responseGetNovelListDto,HttpStatus.OK);
+            // 검색 조건 분기
+            if (type == null || keyword == null || keyword.isBlank()) {
+                novelEntityList = novelRepository.findAll();
+            } else {
+                novelEntityList = switch (type) {
+                    case "title" -> novelRepository.findAllByTitle(keyword);
+                    case "userName" -> novelRepository.findAllByUserUserName(keyword);
+                    case "userId" -> novelRepository.findAllByUserId(keyword);
+                    default -> throw new IllegalArgumentException("유효하지 않은 검색 타입입니다: " + type);
+                };
+            }
+
+            List<ResponseGetNovelDto> responseGetNovelDtoList = novelEntityList.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+
+            ResponseGetNovelListDto response = new ResponseGetNovelListDto();
+            response.setNovelList(responseGetNovelDtoList);
+
+            return ResponseEntity.ok(response);
+
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("소설 검색 중 오류 발생", e);
         }
 
     }
+
+
 
     //내 작품만 조회
     @Transactional
@@ -176,7 +185,7 @@ public class NovelService {
 
     }
 
-    public void setAuthor(NovelEntity novelEntity,ResponseGetNovelDto response) {
+    private void setAuthor(NovelEntity novelEntity,ResponseGetNovelDto response) {
         if(novelEntity.getUser()!=null){
             response.setAuthor(novelEntity.getUser().getUserName());
         }else{
@@ -185,4 +194,14 @@ public class NovelService {
         }
     }
 
+    private ResponseGetNovelDto convertToDto(NovelEntity novelEntity) {
+        ResponseGetNovelDto dto = new ResponseGetNovelDto();
+        dto.setNovelId(novelEntity.getNovelId());
+        setAuthor(novelEntity, dto);
+        dto.setTitle(novelEntity.getTitle());
+        dto.setTitleImage(novelEntity.getTitleImage());
+        dto.setSummary(novelEntity.getSummary());
+        dto.setAvailability(novelEntity.getAvailability());
+        return dto;
+    }
 }

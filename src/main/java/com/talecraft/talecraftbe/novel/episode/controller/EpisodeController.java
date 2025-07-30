@@ -45,11 +45,12 @@ public class EpisodeController {
   //에피소드 수정
   @PatchMapping("/{episodeId}")
   public ResponseEntity<ResponseUpdateEpisodeDto> updateEpisode(@RequestBody RequestUpdateEpisodeDto requestUpdateEpisodeDto, @PathVariable long episodeId, @AuthenticationPrincipal User user) {
-      return episodeService.updateEpisode(requestUpdateEpisodeDto,episodeId);
+      return episodeService.updateEpisode(requestUpdateEpisodeDto,episodeId,user);
   }
 
+  //에피소드 삭제
   @DeleteMapping("/{episodeId}")
-    public ResponseEntity<ResponseDeleteEpisodeDto> deleteEpisode(@PathVariable long episodeId) {
-      return episodeService.deleteEpisode(episodeId);
+    public ResponseEntity<ResponseDeleteEpisodeDto> deleteEpisode(@PathVariable long episodeId,@AuthenticationPrincipal User user) {
+      return episodeService.deleteEpisode(episodeId,user);
   }
 }
