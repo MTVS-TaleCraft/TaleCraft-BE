@@ -22,9 +22,6 @@ public class EpisodeEntity {
     @Comment("소설 화수 ID")
     private Long episodesId;
 
-    @ManyToOne
-    private EpisodeEntity episode;
-
     @Column
     @Comment("소설 화수 제목")
     private String title;
