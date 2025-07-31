@@ -5,14 +5,18 @@ import com.talecraft.talecraftbe.ai.dto.response.AddAIResponseDTO;
 import com.talecraft.talecraftbe.ai.dto.response.FindAIResponseDTO;
 import com.talecraft.talecraftbe.ai.exception.AIRequestFailException;
 import com.talecraft.talecraftbe.ai.service.AIService;
+import com.talecraft.talecraftbe.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -30,10 +34,13 @@ public class AIController {
     }
 
     @GetMapping("/{episodeId}")
-    public ResponseEntity<?> getAi(@PathVariable Long episodeId, @RequestParam Long chatListId) {
+    public ResponseEntity<?> getAi(@AuthenticationPrincipal User user,
+                                   @PathVariable Long episodeId,
+                                   @RequestParam Long chatListId) {
         // AI와 대화한 기록 출력
         log.info("GET : /api/ai/{}" , episodeId);
-        FindAIResponseDTO chatList = aiService.getChatList(episodeId, chatListId);
+        aiService.checkAccess(user, episodeId);
+        FindAIResponseDTO chatList = aiService.getChatList(user, episodeId, chatListId);
 
         return ResponseEntity.ok().body(chatList);
     }
@@ -48,9 +55,12 @@ public class AIController {
             content = @Content(schema = @Schema(implementation = AddAIResponseDTO.class))),
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> postAi(@ModelAttribute AddAIRequestDTO requestDTO) {
+    public ResponseEntity<?> postAi(@AuthenticationPrincipal User user,
+                                    @ModelAttribute AddAIRequestDTO requestDTO) {
         log.info("POST : /api/ai");
         log.info("requestDTO: {}", requestDTO);
+
+        aiService.checkAccess(user, requestDTO.getEpisodeId());
 
         if(requestDTO.isUseChatList() && requestDTO.getEpisodeId() != null) {
             requestDTO.setChatListId(aiService.addChatList(requestDTO));
@@ -83,5 +93,16 @@ public class AIController {
         responseAIDTO.setResponse(e.getMessage());
 
         return ResponseEntity.internalServerError().body(responseAIDTO);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException e) {
+        log.error(e.getMessage());
+
+        AddAIResponseDTO responseAIDTO = new AddAIResponseDTO();
+        responseAIDTO.setStatus(false);
+        responseAIDTO.setResponse(e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseAIDTO);
     }
 }

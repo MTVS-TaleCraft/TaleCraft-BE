@@ -2,10 +2,12 @@ package com.talecraft.talecraftbe.novel.episode.model.entity;
 
 
 import com.talecraft.talecraftbe.novel.episode.dto.request.RequestUpdateEpisodeDto;
+import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -22,8 +24,9 @@ public class EpisodeEntity {
     @Comment("소설 화수 ID")
     private Long episodesId;
 
-    @ManyToOne
-    private EpisodeEntity episode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private NovelEntity novel;
 
     @Column
     @Comment("소설 화수 제목")

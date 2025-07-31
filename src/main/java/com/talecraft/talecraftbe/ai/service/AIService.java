@@ -14,9 +14,13 @@ import com.talecraft.talecraftbe.ai.repository.ChatListRepository;
 import com.talecraft.talecraftbe.ai.repository.ChatMessageRepository;
 import com.talecraft.talecraftbe.novel.episode.model.entity.EpisodeEntity;
 import com.talecraft.talecraftbe.novel.episode.repository.EpisodeRepository;
+import com.talecraft.talecraftbe.novel.episode.service.EpisodeService;
+import com.talecraft.talecraftbe.novel.repository.NovelRepository;
+import com.talecraft.talecraftbe.user.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -160,8 +164,9 @@ public class AIService {
         chatMessageRepository.save(chatMessage);
     }
 
-    public FindAIResponseDTO getChatList(Long episodeId, Long chatListId) {
+    public FindAIResponseDTO getChatList(User user, Long episodeId, Long chatListId) {
         if(chatListId != null) {
+
             List<ChatMessage> findAll = chatMessageRepository.findAllByChatList_ChatListId(chatListId);
             List<ChatMessageResponseDTO> responseDTOList = new ArrayList<>();
             if(!findAll.isEmpty()) {
@@ -200,5 +205,16 @@ public class AIService {
             return save.getChatListId();
         } else
             return null;
+    }
+
+    public void checkAccess(User user, Long episodeId) {
+        EpisodeEntity episodeEntity = episodeRepository.findById(episodeId).orElseThrow(
+                () -> new NoSuchElementException("에피소드ID를 찾을 수 없습니다!")
+        );
+
+        if(!episodeEntity.getNovel().getUser().equals(user)) {
+            if(!user.getAuthorities().contains("ROLE_ADMIN"))
+                throw new AccessDeniedException("권한이 없습니다!");
+        }
     }
 }
