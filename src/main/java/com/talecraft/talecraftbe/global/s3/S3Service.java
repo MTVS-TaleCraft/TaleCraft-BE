@@ -2,6 +2,7 @@ package com.talecraft.talecraftbe.global.s3;
 
 import io.awspring.cloud.s3.S3Template;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class S3Service {
 
@@ -34,15 +36,15 @@ public class S3Service {
 
     @Value("${AWS_BUCKET}")
     private String bucket;
-    Duration duration = Duration.ofSeconds(30);
+    Duration duration = Duration.ofSeconds(60);
 
 
-    public ResponseEntity<ResponseImgDto> getPutSignedUrl(String fileName) {
+    public ResponseEntity<ResponseImgDto> getPutSignedUrl(RequestImgDto requestImgDto) {
         //요청객체를 만들고
+        log.info("Getting url for request: {}", requestImgDto);
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                     .bucket(bucket)
-                    .key(fileName)
-                    .contentType("image/png") // MIME type 지정
+                    .key(requestImgDto.getFileName())
                     .build();
 
         //그객체를 presign요청 객체에 또담고
@@ -53,15 +55,15 @@ public class S3Service {
 
         // 3. Presigned URL 생성
         PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
-
+        log.info("Presigned URL: [{}]", presignedRequest.url().toString());
+        log.info("HTTP method: [{}]", presignedRequest.httpRequest().method());
         // 4. 저장할 publicURL 응답에 담기
-        // 잠재적인 문제점을 생각해보자
-        String publicUrl = buildPublicUrl(s3Client,bucket,fileName);
+        String publicUrl = buildPublicUrl(s3Client,bucket,requestImgDto.getFileName());
         // 4. 응답 객체 생성
         ResponseImgDto response = new ResponseImgDto(presignedRequest.url().toString(),publicUrl);
         return ResponseEntity.ok(response);
     }
-
+    //SUBMIT 버튼->backend presigned 생성및응답->클라이언트응답된url로 put 업로드->
     // 공개 접근 가능한 URL생성 메서드 (만료 안 됨, 퍼블릭 버킷일 때)
     private String buildPublicUrl(S3Client s3Client, String bucket, String key) {
         S3Utilities utilities = s3Client.utilities();

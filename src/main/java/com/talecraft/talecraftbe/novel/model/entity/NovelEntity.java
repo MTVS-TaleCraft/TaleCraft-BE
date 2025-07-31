@@ -1,6 +1,7 @@
 package com.talecraft.talecraftbe.novel.model.entity;
 
 
+import com.talecraft.talecraftbe.novel.episode.model.entity.EpisodeEntity;
 import com.talecraft.talecraftbe.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
+
+import java.util.List;
 
 @Entity
 @Table(name ="novels")
@@ -58,6 +61,10 @@ public class NovelEntity {
     @ColumnDefault("0")
     @Comment("소설 금지 여부")
     boolean isBanned;
+
+    @OneToMany
+    @JoinColumn
+    List<EpisodeEntity> episodeList;
 
     public void updateIsBanned(boolean isBanned) {
         this.isBanned = isBanned;
