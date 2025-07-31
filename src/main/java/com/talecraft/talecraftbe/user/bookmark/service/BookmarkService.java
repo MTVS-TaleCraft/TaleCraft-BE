@@ -4,7 +4,7 @@ import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import com.talecraft.talecraftbe.user.bookmark.dto.response.BookmarkListResponseDTO;
 import com.talecraft.talecraftbe.user.bookmark.dto.response.BookmarkResponseDTO;
-import com.talecraft.talecraftbe.user.bookmark.model.Bookmark;
+import com.talecraft.talecraftbe.user.bookmark.model.entity.Bookmark;
 import com.talecraft.talecraftbe.user.bookmark.repository.BookmarkRepository;
 import com.talecraft.talecraftbe.user.entity.User;
 import org.springframework.stereotype.Service;

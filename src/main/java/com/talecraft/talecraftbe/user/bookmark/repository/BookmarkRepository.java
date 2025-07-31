@@ -1,6 +1,6 @@
 package com.talecraft.talecraftbe.user.bookmark.repository;
 
-import com.talecraft.talecraftbe.user.bookmark.model.Bookmark;
+import com.talecraft.talecraftbe.user.bookmark.model.entity.Bookmark;
 import com.talecraft.talecraftbe.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

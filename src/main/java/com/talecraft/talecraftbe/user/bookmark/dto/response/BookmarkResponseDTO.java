@@ -1,6 +1,6 @@
 package com.talecraft.talecraftbe.user.bookmark.dto.response;
 
-import com.talecraft.talecraftbe.user.bookmark.model.Bookmark;
+import com.talecraft.talecraftbe.user.bookmark.model.entity.Bookmark;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

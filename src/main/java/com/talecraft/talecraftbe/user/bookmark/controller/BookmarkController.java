@@ -1,7 +1,6 @@
 package com.talecraft.talecraftbe.user.bookmark.controller;
 
 import com.talecraft.talecraftbe.user.bookmark.dto.response.BookmarkListResponseDTO;
-import com.talecraft.talecraftbe.user.bookmark.model.Bookmark;
 import com.talecraft.talecraftbe.user.bookmark.service.BookmarkService;
 import com.talecraft.talecraftbe.user.entity.User;
 import lombok.extern.slf4j.Slf4j;

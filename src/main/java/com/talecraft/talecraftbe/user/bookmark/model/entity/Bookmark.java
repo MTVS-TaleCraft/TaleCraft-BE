@@ -1,4 +1,4 @@
-package com.talecraft.talecraftbe.user.bookmark.model;
+package com.talecraft.talecraftbe.user.bookmark.model.entity;
 
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.user.entity.User;
