@@ -36,6 +36,9 @@ public class S3Service {
 
     @Value("${AWS_BUCKET}")
     private String bucket;
+
+    @Value("${AWS_CLOUDFRONT}")
+    private String cloudFront;
     Duration duration = Duration.ofSeconds(60);
 
 
@@ -58,20 +61,16 @@ public class S3Service {
         log.info("Presigned URL: [{}]", presignedRequest.url().toString());
         log.info("HTTP method: [{}]", presignedRequest.httpRequest().method());
         // 4. 저장할 publicURL 응답에 담기
-        String publicUrl = buildPublicUrl(s3Client,bucket,requestImgDto.getFileName());
+        String publicUrl = cloudFront+requestImgDto.getFileName();
+        log.info("Public URL: [{}]", publicUrl);
         // 4. 응답 객체 생성
         ResponseImgDto response = new ResponseImgDto(presignedRequest.url().toString(),publicUrl);
         return ResponseEntity.ok(response);
     }
-    //SUBMIT 버튼->backend presigned 생성및응답->클라이언트응답된url로 put 업로드->
-    // 공개 접근 가능한 URL생성 메서드 (만료 안 됨, 퍼블릭 버킷일 때)
-    private String buildPublicUrl(S3Client s3Client, String bucket, String key) {
-        S3Utilities utilities = s3Client.utilities();
-        GetUrlRequest request = GetUrlRequest.builder()
-                .bucket(bucket)
-                .key(key)
-                .build();
-        return utilities.getUrl(request).toString();
+
+    private String buildPublicUrl( String key) {
+
+        return cloudFront+key;
     }
 
 }
