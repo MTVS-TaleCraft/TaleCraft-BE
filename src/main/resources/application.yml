@@ -4,6 +4,12 @@ spring:
   config:
     import: optional:file:.env[.properties]
 
+  cloud:
+    aws:
+      region:
+        static: ${AWS_REGION}
+
+
   datasource:
     url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
     username: ${MYSQL_USER}
@@ -56,4 +62,7 @@ security:
   jwt:
     secret-key: 0123456789ABCDEF0123456789ABCDEF
     token-validity-ms: 3600000
+
+
+
 

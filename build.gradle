@@ -45,6 +45,11 @@ dependencies {
 
 	// swagger
 	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.5'
+
+	//s3-image-server
+	implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0")
+	implementation "io.awspring.cloud:spring-cloud-aws-starter-s3"
+
 }
 
 tasks.named('test') {

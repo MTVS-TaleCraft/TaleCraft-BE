@@ -51,7 +51,7 @@ public class NovelController {
 
     //전체 조회
     @GetMapping()
-    public ResponseEntity<ResponseGetNovelListDto> getAllNovels(@RequestParam("value") String keyword,@RequestParam(value="type", required=false) String type) {
+    public ResponseEntity<ResponseGetNovelListDto> getAllNovels(@RequestParam(value = "value",required = false) String keyword,@RequestParam(value="type", required=false) String type) {
             return novelService.getNovelList(keyword,type);
     }
 
