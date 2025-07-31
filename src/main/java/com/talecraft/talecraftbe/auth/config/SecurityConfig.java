@@ -17,6 +17,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -40,7 +41,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedOrigins(List.of(
+                "https://tale-craft-three.vercel.app",
+                "http://localhost:3000",  // 로컬 개발용
+                "http://localhost:8080"   // 필요하다면 추가
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -73,6 +78,12 @@ public class SecurityConfig {
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/api/novels/**").permitAll()
                         .requestMatchers("/api/novels").permitAll()
+                        
+                        // 4) 북마크 API (인증 필요)
+                        .requestMatchers("/api/bookmarks/**").authenticated()
+                        
+                        // 5) 태그 API (인증 필요)
+                        .requestMatchers("/api/tags/**").authenticated()
 
                         // 3-1) swagger 리소스
                         .requestMatchers("/swagger-ui/**").permitAll()

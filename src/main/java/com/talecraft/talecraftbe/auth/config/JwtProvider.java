@@ -39,6 +39,7 @@ public class JwtProvider {
         Date expiry = new Date(now.getTime() + tokenValidityInMs);
         return Jwts.builder()
                 .setSubject(authentication.getName())
+                .claim("userId", authentication.getName()) // 사용자 ID를 claim에 추가
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -72,6 +73,15 @@ public class JwtProvider {
         logger.info("Loaded user: {}", user.getUsername());
         
         return new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+    }
+    
+    public String getUserIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("userId", String.class);
     }
 }
 

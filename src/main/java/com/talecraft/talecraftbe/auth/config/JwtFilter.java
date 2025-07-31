@@ -67,9 +67,12 @@ public class JwtFilter extends OncePerRequestFilter {
                 logger.info("Token is valid, setting authentication");
                 Authentication auth = jwtProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                logger.info("Authentication set successfully");
+                logger.info("Authentication set successfully for user: {}", auth.getName());
             } else {
-                logger.warn("Token is null or invalid");
+                logger.warn("Token is null or invalid for path: {}", req.getRequestURI());
+                // 토큰이 없거나 유효하지 않으면 401 반환
+                res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or missing token");
+                return;
             }
 
             chain.doFilter(req, res);
