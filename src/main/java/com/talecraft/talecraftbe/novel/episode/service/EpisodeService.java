@@ -10,6 +10,8 @@ import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import com.talecraft.talecraftbe.user.entity.User;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import java.util.List;
 @Service
 public class EpisodeService {
 
+    private static final Logger log = LoggerFactory.getLogger(EpisodeService.class);
     private final EpisodeRepository episodeRepository;
     private final NovelRepository novelRepository;
 
@@ -32,17 +35,26 @@ public class EpisodeService {
 
     @Transactional
     public ResponseEntity<ResponsePostEpisodeDto> createEpisode(long novelId, RequestPostEpisodeDto requestPostEpisodeDto, User user) {
-
         try {
             NovelEntity novelEntity = novelRepository.findById(novelId).orElseThrow(() -> new RuntimeException("No episode with id " + novelId));
-            if(novelEntity.getUser().getEmail().equals(user.getEmail())) {
+            log.info("novelEntity Id ={}" ,novelId);
+            log.info("novel user Id ={}" ,novelEntity.getUser().getId());
+            log.info("novel user Id ={}" ,novelEntity.getUser().getId());
+            if(novelEntity.getUser().getId().equals(user.getId())) {
                 String note;
-                if (requestPostEpisodeDto.getNote() == null) {
-                    note = "";
-                } else {
+                if (requestPostEpisodeDto.isNotice()) {
                     note = requestPostEpisodeDto.getNote();
+                } else {
+                    note = "";
                 }
-                EpisodeEntity episodeEntity = EpisodeEntity.builder().title(requestPostEpisodeDto.getTitle()).content(requestPostEpisodeDto.getContent()).note(note).build();
+                EpisodeEntity episodeEntity = EpisodeEntity.builder()
+                        .title(requestPostEpisodeDto.getTitle())
+                        .content(requestPostEpisodeDto.getContent())
+                        .note(note)
+                        .isNotice(requestPostEpisodeDto.isNotice())
+                        .novel(novelEntity)
+                        .isDeleted(false)
+                        .build();
                 episodeRepository.save(episodeEntity);
                 ResponsePostEpisodeDto responsePostEpisodeDto = new ResponsePostEpisodeDto();
                 responsePostEpisodeDto.setEpisodeId(episodeEntity.getEpisodesId());
@@ -55,8 +67,8 @@ public class EpisodeService {
 
 
         } catch (RuntimeException e) {
-            System.out.println(e);
-            System.out.println("Error creating episode");
+            log.error("e: ", e);
+            log.info("Error creating episode");
             return new ResponseEntity<>( HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

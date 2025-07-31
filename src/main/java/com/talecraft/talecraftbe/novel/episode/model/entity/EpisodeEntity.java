@@ -29,11 +29,11 @@ public class EpisodeEntity {
     @ToString.Exclude
     private NovelEntity novel;
 
-    @Column
+    @Column(length = 100)
     @Comment("소설 화수 제목")
     private String title;
 
-    @Column
+    @Column(length = 5000)
     @Comment("소설 화수 내용")
     private String content;
 
