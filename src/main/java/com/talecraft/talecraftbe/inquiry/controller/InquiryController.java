@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/inquiry")
 public class InquiryController {
@@ -25,5 +27,10 @@ public class InquiryController {
             @RequestBody InquiryRequestDto inquiryRequestDto,
             @AuthenticationPrincipal User user) {
         return inquiryService.sendInquiry(inquiryRequestDto, user);
+    }
+    
+    @GetMapping("/admin/list")
+    public ResponseEntity<Map<String, Object>> getAllInquiries() {
+        return inquiryService.getAllInquiries();
     }
 } 
