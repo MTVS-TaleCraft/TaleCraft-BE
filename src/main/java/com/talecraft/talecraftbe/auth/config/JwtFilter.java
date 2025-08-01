@@ -49,11 +49,11 @@ public class JwtFilter extends OncePerRequestFilter {
             return true;
         }
         
-        // 소설 목록 조회 경로 제외 (인증 불필요)
+        // 소설 목록 조회 경로 제외 (인증 불필요) - /my 경로는 제외하지 않음
         if (path.equals("/api/novels") && "GET".equals(method)) {
             return true;
         }
-        if (path.startsWith("/api/novels/") && "GET".equals(method)) {
+        if (path.startsWith("/api/novels/") && "GET".equals(method) && !path.equals("/api/novels/my")) {
             return true;
         }
         
@@ -114,8 +114,13 @@ public class JwtFilter extends OncePerRequestFilter {
         logger.info("All cookies: {}", cookies != null ? Arrays.stream(cookies).map(c -> c.getName() + "=" + c.getValue().substring(0, Math.min(c.getValue().length(), 10)) + "...").toList() : "null");
         
         if (cookies != null) {
+            logger.info("Looking for cookie with name: {}", COOKIE_NAME);
             String cookieToken = Arrays.stream(cookies)
-                    .filter(c -> COOKIE_NAME.equals(c.getName()))
+                    .filter(c -> {
+                        boolean matches = COOKIE_NAME.equals(c.getName());
+                        logger.info("Cookie {} matches {}: {}", c.getName(), COOKIE_NAME, matches);
+                        return matches;
+                    })
                     .map(Cookie::getValue)
                     .findFirst()
                     .orElse(null);

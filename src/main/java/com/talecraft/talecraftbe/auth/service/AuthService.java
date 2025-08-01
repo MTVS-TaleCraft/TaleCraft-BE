@@ -108,6 +108,7 @@ public class AuthService {
         String jwt = jwtProvider.generateToken(auth);
         logger.info("JWT token generated: {}", jwt.substring(0, Math.min(jwt.length(), 20)) + "...");
         
+        // JWT 토큰을 쿠키로 설정
         Cookie cookie = new Cookie("JwtToken", jwt);
         cookie.setHttpOnly(true);
         cookie.setSecure(false); // HTTP 환경에서 쿠키 전송을 위해 false로 설정

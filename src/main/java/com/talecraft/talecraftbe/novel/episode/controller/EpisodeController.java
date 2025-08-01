@@ -40,8 +40,8 @@ public class EpisodeController {
 
   //복수 조회
   @GetMapping
-  public ResponseEntity<ResponseGetEpisodeListDto> getEpisode() {
-      return episodeService.getEpisodeList();
+  public ResponseEntity<ResponseGetEpisodeListDto> getEpisode(@PathVariable long novelId) {
+      return episodeService.getEpisodeListByNovelId(novelId);
   }
 
   //에피소드 수정

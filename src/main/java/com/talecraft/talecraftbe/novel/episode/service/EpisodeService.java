@@ -84,11 +84,34 @@ public class EpisodeService {
             responseGetEpisodeDto.setNote(episodeEntity.getNote());
             responseGetEpisodeDto.setCreateDate(episodeEntity.getCreatedDate());
             responseGetEpisodeDto.setNovelId(novelId);
-            return new ResponseEntity<>(new ResponseGetEpisodeDto(), HttpStatus.OK);
+            return new ResponseEntity<>(responseGetEpisodeDto, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(new ResponseGetEpisodeDto(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    @Transactional
+    public ResponseEntity<ResponseGetEpisodeListDto> getEpisodeListByNovelId(long novelId) {
+        try{
+            log.info("Getting episode list for novel ID: {}", novelId);
+            List<EpisodeEntity> episodeEntities = episodeRepository.findByNovelNovelIdAndIsDeletedFalse(novelId);
+            log.info("Found {} episodes for novel ID: {}", episodeEntities.size(), novelId);
+            
+            List<ResponseGetEpisodeItemsDto> episodeItemsDtos = episodeEntities.stream()
+                    .map(ResponseGetEpisodeItemsDto::new)
+                    .toList();
+            log.info("Converted to {} DTOs", episodeItemsDtos.size());
+            
+            ResponseGetEpisodeListDto responseGetEpisodeListDto = new ResponseGetEpisodeListDto();
+            responseGetEpisodeListDto.setEpisodesList(episodeItemsDtos);
+            log.info("Response DTO created with episodes list: {}", responseGetEpisodeListDto.getEpisodesList());
+            
+            return new ResponseEntity<>(responseGetEpisodeListDto, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            log.error("Error getting episode list for novel {}: ", novelId, e);
+            return new ResponseEntity<>(new ResponseGetEpisodeListDto(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Transactional

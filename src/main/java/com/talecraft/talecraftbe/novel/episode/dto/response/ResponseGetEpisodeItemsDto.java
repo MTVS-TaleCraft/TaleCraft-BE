@@ -15,7 +15,7 @@ public class ResponseGetEpisodeItemsDto {
     public ResponseGetEpisodeItemsDto(EpisodeEntity episodeEntity) {
         this.episodeId = episodeEntity.getEpisodesId();
         this.title = episodeEntity.getTitle();
-        this.view = episodeEntity.getView();
+        this.view = episodeEntity.getView() != null ? episodeEntity.getView() : 0;
         this.note = episodeEntity.getNote();
         this.createDate = episodeEntity.getCreatedDate();
     }
