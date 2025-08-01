@@ -78,21 +78,12 @@ public class SecurityConfig {
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/api/novels/**").permitAll()
                         .requestMatchers("/api/novels").permitAll()
-                        
-                        // 4) 북마크 API (인증 필요)
-                        .requestMatchers("/api/bookmarks/**").authenticated()
-                        
-                        // 5) 태그 API (인증 필요)
-                        .requestMatchers("/api/tags/**").authenticated()
 
                         // 3-1) swagger 리소스
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/api-docs/**").permitAll()
-
-                        // 3-2) s3 리소스
-                        .requestMatchers("/api/s3/presigned-url").permitAll()
 
                         // 4) 나머지 요청은 인증 필요
                         .anyRequest().authenticated()
