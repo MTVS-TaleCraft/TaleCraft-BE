@@ -10,5 +10,10 @@ public interface NovelRepository extends JpaRepository< NovelEntity, Long> {
     NovelEntity findByNovelId(long novelId);
 
     List<NovelEntity> findAllByUser(User user);
-    
+
+    List<NovelEntity> findAllByTitle(String keyword);
+
+    List<NovelEntity> findAllByUserUserName(String userUserName);
+
+    List<NovelEntity> findAllByUserId(String userId);
 }

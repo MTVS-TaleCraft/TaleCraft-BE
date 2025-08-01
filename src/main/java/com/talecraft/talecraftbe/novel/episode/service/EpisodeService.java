@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -92,7 +93,7 @@ public class EpisodeService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseUpdateEpisodeDto> updateEpisode(RequestUpdateEpisodeDto requestUpdateEpisodeDto, long episodeId) {
+    public ResponseEntity<ResponseUpdateEpisodeDto> updateEpisode(RequestUpdateEpisodeDto requestUpdateEpisodeDto, long episodeId , @AuthenticationPrincipal User user) {
         try{
             EpisodeEntity episodeEntity = episodeRepository.findById(episodeId).orElseThrow(() -> new RuntimeException("No episode with id " + episodeId));
             episodeEntity.updateEpisode(requestUpdateEpisodeDto);
@@ -105,7 +106,7 @@ public class EpisodeService {
 
 
 
-    public ResponseEntity<ResponseDeleteEpisodeDto> deleteEpisode(long episodeId) {
+    public ResponseEntity<ResponseDeleteEpisodeDto> deleteEpisode(long episodeId,@AuthenticationPrincipal User user) {
         try{
             EpisodeEntity episodeEntity = episodeRepository.findById(episodeId).orElseThrow(() -> new RuntimeException("No episode with id " + episodeId));
             episodeEntity.updateDeleted();

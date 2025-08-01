@@ -91,6 +91,9 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/api-docs/**").permitAll()
 
+                        // 3-2) s3 리소스
+                        .requestMatchers("/api/s3/presigned-url").permitAll()
+
                         // 4) 나머지 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
