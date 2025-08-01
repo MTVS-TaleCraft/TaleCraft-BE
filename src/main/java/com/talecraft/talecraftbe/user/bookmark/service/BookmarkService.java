@@ -28,6 +28,10 @@ public class BookmarkService {
         NovelEntity novelEntity = novelRepository.findById(novelId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 소설ID입니다!: " + novelId)
         );
+        bookmarkRepository.findByUserAndNovel_NovelId(user, novelId).ifPresent(bookmark -> {
+            throw new IllegalArgumentException("이미 북마크된 작품입니다!");
+        });
+
         Bookmark bookmark = new Bookmark();
         bookmark.setNovel(novelEntity);
         bookmark.setUser(user);
@@ -35,6 +39,7 @@ public class BookmarkService {
         return bookmarkRepository.save(bookmark).getBookmarkId();
     }
 
+    @Transactional(readOnly = true)
     public BookmarkListResponseDTO getBookmark(User user) {
         List<Bookmark> allByUser = bookmarkRepository.findAllByUser(user);
         List<BookmarkResponseDTO> responseDTOList = allByUser.stream().map(BookmarkResponseDTO::new).toList();
@@ -42,6 +47,7 @@ public class BookmarkService {
         return new BookmarkListResponseDTO(responseDTOList);
     }
 
+    @Transactional
     public void deleteBookmark(long novelId, User user) {
         Optional<Bookmark> findBookmark = bookmarkRepository.findByUserAndNovel_NovelId(user, novelId);
         if (findBookmark.isPresent()) {

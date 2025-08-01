@@ -28,6 +28,13 @@ public class JwtFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest req) {
         String path = req.getRequestURI();
         String method = req.getMethod();
+
+        if (path.startsWith("/swagger-ui/") || path.equals("/swagger-ui.html")) {
+            return true;
+        }
+        if (path.startsWith("/v3/api-docs/") || path.startsWith("/api-docs/") || path.equals("/api-docs")) {
+            return true;
+        }
         
         // 로그인과 회원가입만 JWT 필터 제외
         if (path.equals("/api/auth/login") && "POST".equals(method)) {
