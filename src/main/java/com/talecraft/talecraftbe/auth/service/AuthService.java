@@ -5,6 +5,7 @@ import com.talecraft.talecraftbe.auth.dto.SignupRequest;
 import com.talecraft.talecraftbe.auth.dto.UpdateUserRequest;
 import com.talecraft.talecraftbe.auth.dto.FindUserIdRequest;
 import com.talecraft.talecraftbe.auth.dto.FindPasswordRequest;
+import com.talecraft.talecraftbe.auth.dto.UserDetailResponse;
 import com.talecraft.talecraftbe.user.entity.User;
 import com.talecraft.talecraftbe.user.repository.UserRepository;
 import com.talecraft.talecraftbe.auth.config.JwtProvider;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 import java.util.Map;
+import java.util.List;
 
 @Service
 public class AuthService {
@@ -162,12 +164,13 @@ public class AuthService {
         return Map.of(
             "userId", currentUser.getId(),
             "userName", currentUser.getUserName(),
-            "email", currentUser.getEmail()
+            "email", currentUser.getEmail(),
+            "authorityId", String.valueOf(currentUser.getAuthorityId())
         );
     }
 
     /**
-     * 프로필 수정: 현재 로그인된 사용자의 정보 수정
+     * 프로필 수정: 현재 로그인된 사용자의 정보 수정 또는 관리자가 다른 사용자 정보 수정
      */
     public void updateProfile(UpdateUserRequest req) {
         // 현재 로그인된 사용자 정보 가져오기
@@ -177,20 +180,28 @@ public class AuthService {
         }
         
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String currentUserId = userDetails.getUsername(); // User 엔티티에서 getUsername()은 이제 id를 반환
+        String currentUserId = userDetails.getUsername();
         
         User currentUser = userRepo.findById(currentUserId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         
-        // 현재 비밀번호 확인
-        if (req.currentPassword() != null && !req.currentPassword().isEmpty()) {
+        // 변경할 사용자 결정 (관리자인 경우 다른 사용자 정보 변경 가능)
+        User targetUser = currentUser;
+        if (currentUser.getAuthorityId() == 3L && req.targetUserId() != null && !req.targetUserId().isEmpty()) {
+            // 관리자가 다른 사용자 정보를 변경하는 경우
+            targetUser = userRepo.findById(req.targetUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("변경할 사용자를 찾을 수 없습니다."));
+        }
+        
+        // 현재 비밀번호 확인 (자신의 정보를 변경하는 경우에만)
+        if (targetUser.getId().equals(currentUserId) && req.currentPassword() != null && !req.currentPassword().isEmpty()) {
             if (!passwordEncoder.matches(req.currentPassword(), currentUser.getPassword())) {
                 throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
             }
         }
         
         // 이메일 중복 검사 (다른 사용자가 사용 중인지 확인)
-        if (req.email() != null && !req.email().isEmpty() && !req.email().equals(currentUser.getEmail())) {
+        if (req.email() != null && !req.email().isEmpty() && !req.email().equals(targetUser.getEmail())) {
             if (userRepo.existsByEmail(req.email())) {
                 throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
             }
@@ -198,18 +209,18 @@ public class AuthService {
         
         // 사용자 정보 업데이트
         if (req.userName() != null && !req.userName().isEmpty()) {
-            currentUser.setUserName(req.userName());
+            targetUser.setUserName(req.userName());
         }
         
         if (req.email() != null && !req.email().isEmpty()) {
-            currentUser.setEmail(req.email());
+            targetUser.setEmail(req.email());
         }
         
         if (req.newPassword() != null && !req.newPassword().isEmpty()) {
-            currentUser.setPassword(passwordEncoder.encode(req.newPassword()));
+            targetUser.setPassword(passwordEncoder.encode(req.newPassword()));
         }
         
-        userRepo.save(currentUser);
+        userRepo.save(targetUser);
     }
 
     /**
@@ -266,5 +277,62 @@ public class AuthService {
         
         return sb.toString();
     }
+
+    /**
+     * 개별 사용자 정보 조회 (관리자용)
+     */
+    public UserDetailResponse getUserDetail(String userId) {
+        // 현재 로그인된 사용자가 관리자인지 확인
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+        
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String currentUserId = userDetails.getUsername();
+        
+        User currentUser = userRepo.findById(currentUserId)
+                .orElseThrow(() -> new IllegalArgumentException("현재 사용자를 찾을 수 없습니다."));
+        
+        // 관리자 권한 확인 (authorityId가 3이어야 함)
+        if (currentUser.getAuthorityId() != 3L) {
+            throw new IllegalArgumentException("관리자 권한이 필요합니다.");
+        }
+        
+        // 조회할 사용자 정보 가져오기
+        User targetUser = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("조회할 사용자를 찾을 수 없습니다."));
+        
+        return UserDetailResponse.fromUser(targetUser);
+    }
+
+    /**
+     * 전체 사용자 목록 조회 (관리자용)
+     */
+    public List<UserDetailResponse> getAllUsers() {
+        // 현재 로그인된 사용자가 관리자인지 확인
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+        
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String currentUserId = userDetails.getUsername();
+        
+        User currentUser = userRepo.findById(currentUserId)
+                .orElseThrow(() -> new IllegalArgumentException("현재 사용자를 찾을 수 없습니다."));
+        
+        // 관리자 권한 확인 (authorityId가 3이어야 함)
+        if (currentUser.getAuthorityId() != 3L) {
+            throw new IllegalArgumentException("관리자 권한이 필요합니다.");
+        }
+        
+        // 전체 사용자 목록 조회 (관리자 제외)
+        List<User> users = userRepo.findByAuthorityIdNot(3L);
+        return users.stream()
+                .map(UserDetailResponse::fromUser)
+                .toList();
+    }
+
 }
 

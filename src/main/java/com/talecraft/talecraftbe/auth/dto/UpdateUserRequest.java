@@ -4,5 +4,6 @@ public record UpdateUserRequest(
         String userName,
         String email,
         String currentPassword,
-        String newPassword
+        String newPassword,
+        String targetUserId
 ) {} 

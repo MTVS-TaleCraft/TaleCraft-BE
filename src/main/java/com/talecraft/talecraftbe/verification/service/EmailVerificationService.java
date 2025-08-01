@@ -30,7 +30,7 @@ public class EmailVerificationService {
     }
 
     /** 이메일 인증 토큰 생성 후 메일 발송 */
-    public void createAndSendToken(String email) {
+    public String createAndSendToken(String email) {
         String code = generateVerificationCode();
         Instant expiredDate = Instant.now().plus(10, ChronoUnit.MINUTES); // 10분으로 단축
         
@@ -40,6 +40,13 @@ public class EmailVerificationService {
         // 새로운 인증 정보 저장
         EmailVerification ev = new EmailVerification(email, code, expiredDate);
         repo.save(ev);
+        
+        // 개발용 로그 출력 (테스트 시 인증 코드 확인용)
+        System.out.println("=== 이메일 인증 코드 (개발용) ===");
+        System.out.println("이메일: " + email);
+        System.out.println("인증 코드: " + code);
+        System.out.println("만료 시간: " + expiredDate);
+        System.out.println("================================");
         
         SimpleMailMessage mail = new SimpleMailMessage();
         mail.setTo(email);
@@ -52,6 +59,8 @@ public class EmailVerificationService {
                 "감사합니다.\n" +
                 "TaleCraft 팀");
         mailSender.send(mail);
+        
+        return code;
     }
 
     /** 토큰 검증 (VERIFIED = 1로 변경) */
