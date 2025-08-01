@@ -34,7 +34,7 @@ public class CommentController {
         return commentService.getAllComment(novelId,pageable);
     }
 
-    @PostMapping("/")
+    @PostMapping("/novels/{novelId}/episodes/{episodeId}/comments")
     public ResponseEntity<ResponsePostCommentDto> addComment(@RequestBody RequestPostCommentDto requestPostCommentDto, @AuthenticationPrincipal User user) {
         return commentService.addComment(requestPostCommentDto, user);
     }

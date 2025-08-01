@@ -30,6 +30,7 @@ public class NovelController {
 
     @PatchMapping("/{novelId}")
     public ResponseEntity<ResponsePatchNovelDto> patchNovel(@PathVariable long novelId, @RequestBody RequestPatchNovelDto requestPatchNovelDto, @AuthenticationPrincipal User user) {
+        //본인만수정하게하세요
         return novelService.updateNovel(requestPatchNovelDto,novelId,user);
     }
 
