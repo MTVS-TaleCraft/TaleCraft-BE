@@ -12,6 +12,10 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Service
 public class InquiryService {
     
@@ -45,6 +49,24 @@ public class InquiryService {
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(new InquiryResponseDto("문의 전송에 실패했습니다: " + e.getMessage(), false));
+        }
+    }
+    
+    public ResponseEntity<Map<String, Object>> getAllInquiries() {
+        try {
+            List<Inquiry> inquiries = inquiryRepository.findAll();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("inquiries", inquiries);
+            response.put("totalCount", inquiries.size());
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "문의 목록을 가져오는데 실패했습니다: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         }
     }
     

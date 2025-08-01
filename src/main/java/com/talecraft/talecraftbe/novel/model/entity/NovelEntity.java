@@ -82,4 +82,8 @@ public class NovelEntity {
     public void updateTitleImage(String titleImage) {
         this.titleImage = titleImage;
     }
+    
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
 }

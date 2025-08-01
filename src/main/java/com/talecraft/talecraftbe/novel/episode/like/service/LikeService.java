@@ -7,9 +7,9 @@ import com.talecraft.talecraftbe.novel.episode.model.entity.EpisodeEntity;
 import com.talecraft.talecraftbe.novel.episode.repository.EpisodeRepository;
 import com.talecraft.talecraftbe.user.entity.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class LikeService {
@@ -21,10 +21,15 @@ public class LikeService {
         this.episodeRepository = episodeRepository;
     }
 
+    @Transactional
     public LikeListResponseDTO addLike(User user, long episodeId) {
         EpisodeEntity episode = episodeRepository.findById(episodeId).orElseThrow(
                 () -> new IllegalArgumentException("회차 아이디를 찾을 수 없습니다! " + episodeId)
         );
+        likeRepository.findByUserAndEpisode_EpisodesId(user, episodeId).ifPresent(like -> {
+            throw new IllegalArgumentException("이미 좋아요를 누른 회차입니다.");
+        });
+
         Like like = new Like();
         like.setUser(user);
         like.setEpisode(episode);
@@ -34,13 +39,14 @@ public class LikeService {
         return new LikeListResponseDTO(List.of(like.getLikeId()),"좋아요 등록에 성공했습니다.");
     }
 
+    @Transactional
     public LikeListResponseDTO deleteLike(User user, long episodeId) {
-        Like findLike = likeRepository.findByUserAndEpisode_EpisodesId(user, episodeId);
-        likeRepository.deleteById(findLike.getLikeId());
+        likeRepository.findByUserAndEpisode_EpisodesId(user, episodeId).ifPresent(likeRepository::delete);
 
         return new LikeListResponseDTO(null, "좋아요 삭제에 성공했습니다.");
     }
 
+    @Transactional(readOnly = true)
     public LikeListResponseDTO getLike(User user, long novelId) {
         List<Like> likeList = likeRepository.findAllByUserAndEpisode_Novel_NovelId(user, novelId);
 
