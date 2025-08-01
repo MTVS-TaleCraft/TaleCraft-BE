@@ -12,4 +12,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     List<Bookmark> findAllByUser(User user);
 
     Optional<Bookmark> findByUserAndNovel_NovelId(User user, Long novelId);
+    
+    void deleteByUser(User user);
 }

@@ -42,6 +42,14 @@ public class JwtFilter extends OncePerRequestFilter {
             return true;
         }
         
+        // 소설 목록 조회 경로 제외 (인증 불필요)
+        if (path.equals("/api/novels") && "GET".equals(method)) {
+            return true;
+        }
+        if (path.startsWith("/api/novels/") && "GET".equals(method)) {
+            return true;
+        }
+        
         return false;
     }
 
