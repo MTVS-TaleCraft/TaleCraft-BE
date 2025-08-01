@@ -117,7 +117,7 @@ public class EpisodeService {
     }
 
 
-
+    @Transactional
     public ResponseEntity<ResponseDeleteEpisodeDto> deleteEpisode(long episodeId,@AuthenticationPrincipal User user) {
         try{
             EpisodeEntity episodeEntity = episodeRepository.findById(episodeId).orElseThrow(() -> new RuntimeException("No episode with id " + episodeId));
