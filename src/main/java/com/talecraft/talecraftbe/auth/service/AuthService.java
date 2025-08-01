@@ -110,9 +110,9 @@ public class AuthService {
         
         Cookie cookie = new Cookie("JwtToken", jwt);
         cookie.setHttpOnly(true);
-        // http 환경에서 swagger를 사용하기 위해 임시 주석 처리, 추후 배포할 때 주석 풀기
-//        cookie.setSecure(true);
+        cookie.setSecure(false); // HTTP 환경에서 쿠키 전송을 위해 false로 설정
         cookie.setPath("/");
+        cookie.setDomain("localhost"); // 로컬 개발 환경을 위한 도메인 설정
         response.addCookie(cookie);
         logger.info("JWT cookie set");
         
@@ -137,8 +137,9 @@ public class AuthService {
         // JWT 쿠키 제거
         Cookie cookie = new Cookie("JwtToken", null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false); // HTTP 환경에서 쿠키 전송을 위해 false로 설정
         cookie.setPath("/");
+        cookie.setDomain("localhost"); // 로컬 개발 환경을 위한 도메인 설정
         cookie.setMaxAge(0); // 쿠키 즉시 만료
         response.addCookie(cookie);
         

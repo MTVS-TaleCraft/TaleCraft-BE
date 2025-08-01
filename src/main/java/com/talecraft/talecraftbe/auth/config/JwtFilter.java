@@ -110,8 +110,11 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         // 2. 쿠키에서 토큰 추출
-        if (request.getCookies() != null) {
-            String cookieToken = Arrays.stream(request.getCookies())
+        Cookie[] cookies = request.getCookies();
+        logger.info("All cookies: {}", cookies != null ? Arrays.stream(cookies).map(c -> c.getName() + "=" + c.getValue().substring(0, Math.min(c.getValue().length(), 10)) + "...").toList() : "null");
+        
+        if (cookies != null) {
+            String cookieToken = Arrays.stream(cookies)
                     .filter(c -> COOKIE_NAME.equals(c.getName()))
                     .map(Cookie::getValue)
                     .findFirst()
