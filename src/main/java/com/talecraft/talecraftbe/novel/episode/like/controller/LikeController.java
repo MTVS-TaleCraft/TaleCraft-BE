@@ -31,9 +31,12 @@ public class LikeController {
     public ResponseEntity<?> addLike(@AuthenticationPrincipal User user, @PathVariable Long novelId, @PathVariable long episodeId) {
         log.info("POST : /api/novel/{}/like/episode/{}", novelId, episodeId);
 
-        LikeListResponseDTO responseDTO = likeService.addLike(user, episodeId);
+        String userId = user.getId();
+        synchronized (userId.intern()) {
+            LikeListResponseDTO responseDTO = likeService.addLike(user, episodeId);
 
-        return ResponseEntity.ok().body(responseDTO);
+            return ResponseEntity.ok().body(responseDTO);
+        }
     }
 
     @DeleteMapping("/episodes/{episodeId}")

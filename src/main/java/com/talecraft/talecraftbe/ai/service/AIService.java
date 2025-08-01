@@ -164,6 +164,7 @@ public class AIService {
         chatMessageRepository.save(chatMessage);
     }
 
+    @Transactional(readOnly = true)
     public FindAIResponseDTO getChatList(User user, Long episodeId, Long chatListId) {
         if(chatListId != null) {
 
@@ -190,6 +191,7 @@ public class AIService {
         }
     }
 
+    @Transactional
     public Long addChatList(AddAIRequestDTO requestDTO) {
         Optional<ChatList> findChatList = chatListRepository.findByEpisode_EpisodesId(requestDTO.getEpisodeId());
         if(findChatList.isEmpty()) {

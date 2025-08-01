@@ -30,13 +30,17 @@ public class BookmarkController {
 
     @PostMapping("{novelId}")
     public ResponseEntity<?> addBookmark(@PathVariable long novelId, @AuthenticationPrincipal User user) {
-        Long bookmarkId = bookmarkService.addBookmark(novelId, user);
+        String userId = user.getId();
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("bookmarkId", bookmarkId);
-        response.put("message", "북마크가 등록되었습니다.");
+        synchronized (userId.intern()) {
+            Long bookmarkId = bookmarkService.addBookmark(novelId, user);
 
-        return ResponseEntity.ok().body(response);
+            Map<String, Object> response = new HashMap<>();
+            response.put("bookmarkId", bookmarkId);
+            response.put("message", "북마크가 등록되었습니다.");
+
+            return ResponseEntity.ok().body(response);
+        }
     }
 
     @DeleteMapping("{novelId}")
