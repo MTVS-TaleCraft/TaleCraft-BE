@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -28,35 +30,51 @@ public class JwtFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest req) {
         String path = req.getRequestURI();
         String method = req.getMethod();
+        
+        logger.info("shouldNotFilter called for path: {} method: {}", path, method);
 
         if (path.startsWith("/swagger-ui/") || path.equals("/swagger-ui.html")) {
+            logger.info("Excluding swagger-ui path");
             return true;
         }
         if (path.startsWith("/v3/api-docs/") || path.startsWith("/api-docs/") || path.equals("/api-docs")) {
+            logger.info("Excluding api-docs path");
             return true;
         }
         
         // 로그인과 회원가입만 JWT 필터 제외
         if (path.equals("/api/auth/login") && "POST".equals(method)) {
+            logger.info("Excluding login path");
             return true;
         }
         if (path.equals("/api/auth/signup") && "POST".equals(method)) {
+            logger.info("Excluding signup path");
             return true;
         }
         
         // 이메일 인증 관련 경로 제외
         if (path.startsWith("/api/verification/")) {
+            logger.info("Excluding verification path");
             return true;
         }
         
         // 소설 목록 조회 경로 제외 (인증 불필요) - /my 경로는 제외하지 않음
         if (path.equals("/api/novels") && "GET".equals(method)) {
+            logger.info("Excluding novels list path");
             return true;
         }
-        if (path.startsWith("/api/novels/") && "GET".equals(method) && !path.equals("/api/novels/my")) {
+        if (path.startsWith("/api/novels/") && "GET".equals(method) && !path.equals("/api/novels/my") && !path.contains("/bookmarks/")) {
+            logger.info("Excluding novel detail path");
             return true;
         }
         
+        // 기본 태그 API 제외 (인증 불필요)
+        if (path.equals("/api/tags/common") && "GET".equals(method)) {
+            logger.info("Excluding common tags path");
+            return true;
+        }
+        
+        logger.info("Path {} will be filtered", path);
         return false;
     }
 
@@ -70,6 +88,14 @@ public class JwtFilter extends OncePerRequestFilter {
         if (shouldNotFilter(req)) {
             chain.doFilter(req, res);
             return;
+        }
+
+        // 북마크 관련 경로에 대한 특별 로그
+        if (req.getRequestURI().contains("/bookmarks/")) {
+            logger.info("북마크 요청 감지: {}", req.getRequestURI());
+            logger.info("요청 메서드: {}", req.getMethod());
+            logger.info("모든 헤더: {}", Collections.list(req.getHeaderNames()).stream()
+                .collect(Collectors.toMap(name -> name, req::getHeader)));
         }
 
         try {

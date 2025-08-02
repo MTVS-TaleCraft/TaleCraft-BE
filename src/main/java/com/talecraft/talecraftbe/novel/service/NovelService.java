@@ -6,6 +6,7 @@ import com.talecraft.talecraftbe.novel.dto.request.RequestPostNovelDto;
 import com.talecraft.talecraftbe.novel.dto.response.*;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
+import com.talecraft.talecraftbe.tag.service.TagService;
 import com.talecraft.talecraftbe.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -23,10 +24,12 @@ import java.util.stream.Collectors;
 @Service
 public class NovelService {
     private final NovelRepository novelRepository;
+    private final TagService tagService;
 
     @Autowired
-    public NovelService(NovelRepository novelRepository) {
+    public NovelService(NovelRepository novelRepository, TagService tagService) {
         this.novelRepository = novelRepository;
+        this.tagService = tagService;
     }
 
     @Transactional
@@ -89,6 +92,16 @@ public class NovelService {
             responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
             responseGetNovelDto.setSummary(novelEntity.getSummary());
             responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+            
+            // 태그 정보 가져오기
+            try {
+                var tagResponse = tagService.getTagsByNovelId(novelId);
+                responseGetNovelDto.setTags(tagResponse.getTagNames());
+            } catch (Exception e) {
+                log.warn("태그 정보 조회 실패: novelId={}, error={}", novelId, e.getMessage());
+                responseGetNovelDto.setTags(new ArrayList<>());
+            }
+            
             return new ResponseEntity<>(responseGetNovelDto, HttpStatus.OK);
             //
         }catch(RuntimeException e){
@@ -111,6 +124,16 @@ public class NovelService {
                 responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
                 responseGetNovelDto.setSummary(novelEntity.getSummary());
                 responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+                
+                // 태그 정보 가져오기
+                try {
+                    var tagResponse = tagService.getTagsByNovelId(novelId);
+                    responseGetNovelDto.setTags(tagResponse.getTagNames());
+                } catch (Exception e) {
+                    log.warn("태그 정보 조회 실패: novelId={}, error={}", novelId, e.getMessage());
+                    responseGetNovelDto.setTags(new ArrayList<>());
+                }
+                
                 return new ResponseEntity<>(responseGetNovelDto, HttpStatus.OK);
                 //
             }else{
@@ -174,6 +197,16 @@ public class NovelService {
                 responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
                 responseGetNovelDto.setSummary(novelEntity.getSummary());
                 responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+                
+                // 태그 정보 가져오기
+                try {
+                    var tagResponse = tagService.getTagsByNovelId(novelEntity.getNovelId());
+                    responseGetNovelDto.setTags(tagResponse.getTagNames());
+                } catch (Exception e) {
+                    log.warn("태그 정보 조회 실패: novelId={}, error={}", novelEntity.getNovelId(), e.getMessage());
+                    responseGetNovelDto.setTags(new ArrayList<>());
+                }
+                
                 responseGetNovelDtoList.add(responseGetNovelDto);
             }
             responseGetNovelListDto.setNovelList(responseGetNovelDtoList);
@@ -202,6 +235,16 @@ public class NovelService {
         dto.setTitleImage(novelEntity.getTitleImage());
         dto.setSummary(novelEntity.getSummary());
         dto.setAvailability(novelEntity.getAvailability());
+        
+        // 태그 정보 가져오기
+        try {
+            var tagResponse = tagService.getTagsByNovelId(novelEntity.getNovelId());
+            dto.setTags(tagResponse.getTagNames());
+        } catch (Exception e) {
+            log.warn("태그 정보 조회 실패: novelId={}, error={}", novelEntity.getNovelId(), e.getMessage());
+            dto.setTags(new ArrayList<>());
+        }
+        
         return dto;
     }
 }

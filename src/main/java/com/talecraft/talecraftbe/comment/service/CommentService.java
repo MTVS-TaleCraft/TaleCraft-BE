@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -29,31 +30,46 @@ public class CommentService {
         this.novelRepository = novelRepository;
     }
 
-    public ResponseEntity<ResponseGetCommentListDto> getAllComment(Long novelId, Pageable pageable) {
+    public ResponseEntity<ResponseGetCommentListDto> getAllComment(Long novelId, Long episodeId, Pageable pageable) {
         try{
+            log.info("Getting comments for novel ID: {} and episode ID: {}", novelId, episodeId);
             NovelEntity novelEntity = novelRepository.findById(novelId).orElseThrow(() -> new NovelNotFoundException(novelId));
-            Page<CommentEntity> commentPage = commentRepository.findByNovel(novelEntity, pageable);
+            log.info("Found novel: {}", novelEntity.getTitle());
+            
+            Page<CommentEntity> commentPage = commentRepository.findByNovelAndEpisodeId(novelEntity, episodeId, pageable);
+            log.info("Found {} comments", commentPage.getTotalElements());
+            
             List<ResponseGetCommentItemDto> commentDtos = commentPage.stream()
                     .map(ResponseGetCommentItemDto::new)
                     .toList();
+            log.info("Converted to {} DTOs", commentDtos.size());
 
             ResponseGetCommentListDto responseDto = new ResponseGetCommentListDto(
                     commentDtos,
                     commentPage.getTotalPages(),
                     commentPage.getTotalElements()
             );
+            log.info("Response DTO created: {}", responseDto);
 
             return new ResponseEntity<>(responseDto, HttpStatus.OK);
         } catch (RuntimeException e) {
+            log.error("Error getting comments for novel {} and episode {}: ", novelId, episodeId, e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
 
-    public ResponseEntity<ResponsePostCommentDto> addComment(RequestPostCommentDto requestPostCommentDto, User user) {
+    public ResponseEntity<ResponsePostCommentDto> addComment(Long novelId, Long episodeId, RequestPostCommentDto requestPostCommentDto, User user) {
         try{
+            NovelEntity novelEntity = novelRepository.findById(novelId).orElseThrow(() -> new NovelNotFoundException(novelId));
             CommentEntity commentEntity = CommentEntity.builder()
-                    .content(requestPostCommentDto.getContent()).user(user).build();
+                    .content(requestPostCommentDto.getContent())
+                    .user(user)
+                    .novel(novelEntity)
+                    .episodeId(episodeId)
+                    .createdDate(LocalDate.now())
+                    .isDeleted(false)
+                    .build();
             commentRepository.save(commentEntity);
             return new ResponseEntity<>(new ResponsePostCommentDto(commentEntity.getCommentId(),"댓글 등록 성공"), HttpStatus.OK);
         } catch (RuntimeException e) {

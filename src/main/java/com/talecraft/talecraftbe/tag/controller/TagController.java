@@ -154,4 +154,46 @@ public class TagController {
             return ResponseEntity.badRequest().body("태그 확인 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
+
+    // 기본 태그 목록 조회
+    @GetMapping("/common")
+    public ResponseEntity<?> getCommonTags() {
+        log.info("Getting common tags");
+        
+        try {
+            log.info("Calling tagService.getCommonTags()");
+            List<String> commonTags = tagService.getCommonTags();
+            log.info("Retrieved {} common tags: {}", commonTags.size(), commonTags);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("commonTags", commonTags);
+            response.put("count", commonTags.size());
+            
+            log.info("Returning response: {}", response);
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            log.error("Error getting common tags: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body("기본 태그 조회 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+    // 기본 태그를 작품에 추가
+    @PostMapping("/novels/{novelId}/common/{tagName}")
+    public ResponseEntity<?> addCommonTagToNovel(@PathVariable Long novelId, @PathVariable String tagName) {
+        log.info("Adding common tag: {} to novel: {}", tagName, novelId);
+        
+        try {
+            tagService.addCommonTagToNovel(novelId, tagName);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "기본 태그가 성공적으로 추가되었습니다.");
+            response.put("novelId", novelId);
+            response.put("addedTag", tagName);
+            
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            log.error("Error adding common tag {} to novel {}: {}", tagName, novelId, e.getMessage());
+            return ResponseEntity.badRequest().body("기본 태그 추가 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
 } 

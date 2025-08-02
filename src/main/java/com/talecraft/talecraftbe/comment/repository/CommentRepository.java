@@ -11,5 +11,5 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<CommentEntity,Long> {
     List<CommentEntity> findCommentEntitiesByNovel(NovelEntity novel);
     Page<CommentEntity> findByNovel(NovelEntity novel, Pageable pageable);
-
+    Page<CommentEntity> findByNovelAndEpisodeId(NovelEntity novel, Long episodeId, Pageable pageable);
 }

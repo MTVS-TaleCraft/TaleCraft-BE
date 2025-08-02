@@ -7,12 +7,14 @@ import com.talecraft.talecraftbe.user.bookmark.dto.response.BookmarkResponseDTO;
 import com.talecraft.talecraftbe.user.bookmark.model.entity.Bookmark;
 import com.talecraft.talecraftbe.user.bookmark.repository.BookmarkRepository;
 import com.talecraft.talecraftbe.user.entity.User;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class BookmarkService {
     private BookmarkRepository bookmarkRepository;
@@ -54,6 +56,20 @@ public class BookmarkService {
             bookmarkRepository.delete(findBookmark.get());
         } else {
             throw new IllegalArgumentException("북마크를 삭제하는데 실패했습니다!");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isBookmarked(long novelId, User user) {
+        try {
+            log.info("북마크 상태 확인 중: novelId={}, userId={}", novelId, user.getId());
+            Optional<Bookmark> bookmark = bookmarkRepository.findByUserAndNovel_NovelId(user, novelId);
+            boolean exists = bookmark.isPresent();
+            log.info("북마크 조회 결과: novelId={}, userId={}, exists={}", novelId, user.getId(), exists);
+            return exists;
+        } catch (Exception e) {
+            log.error("북마크 상태 확인 중 오류 발생: novelId={}, userId={}", novelId, user.getId(), e);
+            return false;
         }
     }
 }

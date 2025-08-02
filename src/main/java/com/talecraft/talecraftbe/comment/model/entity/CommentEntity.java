@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 @Getter
 @Builder
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class CommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -39,6 +41,10 @@ public class CommentEntity {
     @Column
     @Comment("내용")
     private String content;
+
+    @Column
+    @Comment("에피소드ID")
+    private Long episodeId;
 
     @Column
     @Comment("삭제여부")

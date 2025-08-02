@@ -29,14 +29,14 @@ public class CommentController {
     }
 
     @GetMapping("/novels/{novelId}/episodes/{episodeId}/comments")
-    public ResponseEntity<ResponseGetCommentListDto> getAllComments(@PathVariable long novelId, @AuthenticationPrincipal User user, @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+    public ResponseEntity<ResponseGetCommentListDto> getAllComments(@PathVariable long novelId, @PathVariable long episodeId, @AuthenticationPrincipal User user, @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)
     Pageable pageable) {
-        return commentService.getAllComment(novelId,pageable);
+        return commentService.getAllComment(novelId, episodeId, pageable);
     }
 
     @PostMapping("/novels/{novelId}/episodes/{episodeId}/comments")
-    public ResponseEntity<ResponsePostCommentDto> addComment(@RequestBody RequestPostCommentDto requestPostCommentDto, @AuthenticationPrincipal User user) {
-        return commentService.addComment(requestPostCommentDto, user);
+    public ResponseEntity<ResponsePostCommentDto> addComment(@PathVariable long novelId, @PathVariable long episodeId, @RequestBody RequestPostCommentDto requestPostCommentDto, @AuthenticationPrincipal User user) {
+        return commentService.addComment(novelId, episodeId, requestPostCommentDto, user);
     }
 
 

@@ -102,7 +102,43 @@ public class TagService {
     // 태그 존재 여부 확인
     @Transactional(readOnly = true)
     public boolean isTagExists(Long novelId, String tagName) {
+        log.info("Checking if tag exists: {} for novel: {}", tagName, novelId);
         return tagRepository.existsByNovelIdAndTagName(novelId, tagName);
+    }
+    
+    // 기본 태그 목록 조회 (novelId = 0인 태그들)
+    @Transactional(readOnly = true)
+    public List<String> getCommonTags() {
+        log.info("Getting common tags");
+        List<Tag> commonTags = tagRepository.findByNovelId(0L);
+        return commonTags.stream()
+                .map(Tag::getTagName)
+                .collect(Collectors.toList());
+    }
+    
+    // 기본 태그를 작품에 추가
+    public void addCommonTagToNovel(Long novelId, String tagName) {
+        log.info("Adding common tag: {} to novel: {}", tagName, novelId);
+        
+        // 기본 태그가 존재하는지 확인
+        if (!tagRepository.existsByNovelIdAndTagName(0L, tagName)) {
+            throw new IllegalArgumentException("기본 태그가 존재하지 않습니다: " + tagName);
+        }
+        
+        // 이미 작품에 해당 태그가 있는지 확인
+        if (tagRepository.existsByNovelIdAndTagName(novelId, tagName)) {
+            log.info("Tag already exists: {} for novel {}", tagName, novelId);
+            return;
+        }
+        
+        // 기본 태그를 작품에 추가
+        Tag tag = new Tag();
+        tag.setNovelId(novelId);
+        tag.setTagName(tagName);
+        tag.setTagId(generateTagId());
+        tagRepository.save(tag);
+        
+        log.info("Common tag added: {} to novel {}", tagName, novelId);
     }
     
     // 태그 ID 생성 (간단한 구현)
@@ -110,7 +146,7 @@ public class TagService {
         return System.currentTimeMillis();
     }
     
-    // 작품ID와 태그명으로 태그 ID 찾기
+    // novelId와 tagName으로 tagId 찾기
     private Long findTagIdByNovelIdAndTagName(Long novelId, String tagName) {
         List<Tag> tags = tagRepository.findByNovelId(novelId);
         return tags.stream()
