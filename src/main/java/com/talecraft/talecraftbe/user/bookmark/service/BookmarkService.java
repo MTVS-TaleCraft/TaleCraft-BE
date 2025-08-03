@@ -43,8 +43,13 @@ public class BookmarkService {
 
     @Transactional(readOnly = true)
     public BookmarkListResponseDTO getBookmark(User user) {
+        log.info("북마크 조회 서비스 호출: userId={}", user.getId());
+        
         List<Bookmark> allByUser = bookmarkRepository.findAllByUser(user);
+        log.info("데이터베이스에서 조회된 북마크 수: {}", allByUser.size());
+        
         List<BookmarkResponseDTO> responseDTOList = allByUser.stream().map(BookmarkResponseDTO::new).toList();
+        log.info("변환된 북마크 DTO 수: {}", responseDTOList.size());
 
         return new BookmarkListResponseDTO(responseDTOList);
     }

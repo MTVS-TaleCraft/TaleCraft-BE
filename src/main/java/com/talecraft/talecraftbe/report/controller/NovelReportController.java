@@ -3,7 +3,9 @@ package com.talecraft.talecraftbe.report.controller;
 import com.talecraft.talecraftbe.report.service.NovelReportService;
 import com.talecraft.talecraftbe.report.dto.NovelReportRequest;
 import com.talecraft.talecraftbe.report.dto.NovelReportResponse;
+import com.talecraft.talecraftbe.user.entity.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,6 +116,36 @@ public class NovelReportController {
         } catch (Exception e) {
             logger.error("Error retrieving report count for novel ID: {}", novelId, e);
             return ResponseEntity.badRequest().body(Map.of("error", "신고 개수 조회에 실패했습니다."));
+        }
+    }
+    
+    /**
+     * 신고된 소설 ID 목록 조회 (관리자용)
+     */
+    @GetMapping("/reported-novels")
+    public ResponseEntity<?> getReportedNovelIds(@AuthenticationPrincipal User user) {
+        try {
+            logger.info("getReportedNovelIds called by user: {}", user != null ? user.getId() : "null");
+            
+            // 관리자 권한 확인
+            if (user == null) {
+                logger.warn("Unauthorized access attempt to reported novels");
+                return ResponseEntity.status(401).body(Map.of("error", "로그인이 필요합니다."));
+            }
+            
+            logger.info("User authority ID: {}", user.getAuthorityId());
+            
+            if (user.getAuthorityId() == null || user.getAuthorityId() != 3L) {
+                logger.warn("Non-admin user {} attempted to access reported novels", user.getId());
+                return ResponseEntity.status(403).body(Map.of("error", "관리자 권한이 필요합니다."));
+            }
+            
+            List<Long> reportedNovelIds = novelReportService.getReportedNovelIds();
+            logger.info("Admin {} retrieved {} reported novel IDs", user.getId(), reportedNovelIds.size());
+            return ResponseEntity.ok(Map.of("reportedNovelIds", reportedNovelIds));
+        } catch (Exception e) {
+            logger.error("Error retrieving reported novel IDs", e);
+            return ResponseEntity.badRequest().body(Map.of("error", "신고된 소설 목록 조회에 실패했습니다."));
         }
     }
 } 

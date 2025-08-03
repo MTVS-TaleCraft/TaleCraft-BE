@@ -114,6 +114,13 @@ public class NovelReportService {
     public long getReportCountByNovelId(Long novelId) {
         return novelReportRepository.countByNovelId(novelId);
     }
+    
+    /**
+     * 신고된 소설 ID 목록 조회 (관리자용)
+     */
+    public List<Long> getReportedNovelIds() {
+        return novelReportRepository.findDistinctNovelIds();
+    }
 
     /**
      * Entity를 Response DTO로 변환

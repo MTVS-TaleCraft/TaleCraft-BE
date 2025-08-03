@@ -63,6 +63,10 @@ public class NovelController {
         return novelService.getMyNovelList(user);
     }
 
-
+    // 소설 차단/해제 (관리자용)
+    @PatchMapping("/{novelId}/ban")
+    public ResponseEntity<?> toggleNovelBan(@PathVariable long novelId, @AuthenticationPrincipal User user) {
+        return novelService.toggleNovelBan(novelId, user);
+    }
 
 }

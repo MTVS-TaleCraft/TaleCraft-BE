@@ -6,7 +6,6 @@ import com.talecraft.talecraftbe.novel.dto.request.RequestPostNovelDto;
 import com.talecraft.talecraftbe.novel.dto.response.*;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
-import com.talecraft.talecraftbe.tag.service.TagService;
 import com.talecraft.talecraftbe.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -18,18 +17,17 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class NovelService {
     private final NovelRepository novelRepository;
-    private final TagService tagService;
 
     @Autowired
-    public NovelService(NovelRepository novelRepository, TagService tagService) {
+    public NovelService(NovelRepository novelRepository) {
         this.novelRepository = novelRepository;
-        this.tagService = tagService;
     }
 
     @Transactional
@@ -92,15 +90,10 @@ public class NovelService {
             responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
             responseGetNovelDto.setSummary(novelEntity.getSummary());
             responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+            responseGetNovelDto.setBanned(novelEntity.isBanned());
             
-            // 태그 정보 가져오기
-            try {
-                var tagResponse = tagService.getTagsByNovelId(novelId);
-                responseGetNovelDto.setTags(tagResponse.getTagNames());
-            } catch (Exception e) {
-                log.warn("태그 정보 조회 실패: novelId={}, error={}", novelId, e.getMessage());
-                responseGetNovelDto.setTags(new ArrayList<>());
-            }
+            log.info("getNovel - novelId: {}, isBanned: {}", novelId, novelEntity.isBanned());
+            log.info("getNovel - responseGetNovelDto.isBanned: {}", responseGetNovelDto.isBanned());
             
             return new ResponseEntity<>(responseGetNovelDto, HttpStatus.OK);
             //
@@ -124,16 +117,7 @@ public class NovelService {
                 responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
                 responseGetNovelDto.setSummary(novelEntity.getSummary());
                 responseGetNovelDto.setAvailability(novelEntity.getAvailability());
-                
-                // 태그 정보 가져오기
-                try {
-                    var tagResponse = tagService.getTagsByNovelId(novelId);
-                    responseGetNovelDto.setTags(tagResponse.getTagNames());
-                } catch (Exception e) {
-                    log.warn("태그 정보 조회 실패: novelId={}, error={}", novelId, e.getMessage());
-                    responseGetNovelDto.setTags(new ArrayList<>());
-                }
-                
+                responseGetNovelDto.setBanned(novelEntity.isBanned());
                 return new ResponseEntity<>(responseGetNovelDto, HttpStatus.OK);
                 //
             }else{
@@ -164,7 +148,12 @@ public class NovelService {
                 };
             }
 
-            List<ResponseGetNovelDto> responseGetNovelDtoList = novelEntityList.stream()
+            // 차단되지 않은 소설만 필터링
+            List<NovelEntity> filteredNovelList = novelEntityList.stream()
+                    .filter(novel -> !novel.isBanned())
+                    .collect(Collectors.toList());
+
+            List<ResponseGetNovelDto> responseGetNovelDtoList = filteredNovelList.stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
 
@@ -190,24 +179,17 @@ public class NovelService {
             //가독성개선방향찾기
             List<ResponseGetNovelDto> responseGetNovelDtoList = new ArrayList<>();
             for (NovelEntity novelEntity : novelEntityList) {
-                ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
-                responseGetNovelDto.setNovelId(novelEntity.getNovelId());
-                setAuthor(novelEntity, responseGetNovelDto);
-                responseGetNovelDto.setTitle(novelEntity.getTitle());
-                responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
-                responseGetNovelDto.setSummary(novelEntity.getSummary());
-                responseGetNovelDto.setAvailability(novelEntity.getAvailability());
-                
-                // 태그 정보 가져오기
-                try {
-                    var tagResponse = tagService.getTagsByNovelId(novelEntity.getNovelId());
-                    responseGetNovelDto.setTags(tagResponse.getTagNames());
-                } catch (Exception e) {
-                    log.warn("태그 정보 조회 실패: novelId={}, error={}", novelEntity.getNovelId(), e.getMessage());
-                    responseGetNovelDto.setTags(new ArrayList<>());
+                // 차단되지 않은 소설만 포함
+                if (!novelEntity.isBanned()) {
+                    ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
+                    responseGetNovelDto.setNovelId(novelEntity.getNovelId());
+                    setAuthor(novelEntity, responseGetNovelDto);
+                    responseGetNovelDto.setTitle(novelEntity.getTitle());
+                    responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
+                    responseGetNovelDto.setSummary(novelEntity.getSummary());
+                    responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+                    responseGetNovelDtoList.add(responseGetNovelDto);
                 }
-                
-                responseGetNovelDtoList.add(responseGetNovelDto);
             }
             responseGetNovelListDto.setNovelList(responseGetNovelDtoList);
 
@@ -228,23 +210,70 @@ public class NovelService {
     }
 
     private ResponseGetNovelDto convertToDto(NovelEntity novelEntity) {
-        ResponseGetNovelDto dto = new ResponseGetNovelDto();
-        dto.setNovelId(novelEntity.getNovelId());
-        setAuthor(novelEntity, dto);
-        dto.setTitle(novelEntity.getTitle());
-        dto.setTitleImage(novelEntity.getTitleImage());
-        dto.setSummary(novelEntity.getSummary());
-        dto.setAvailability(novelEntity.getAvailability());
-        
-        // 태그 정보 가져오기
+        ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
+        responseGetNovelDto.setNovelId(novelEntity.getNovelId());
+        setAuthor(novelEntity, responseGetNovelDto);
+        responseGetNovelDto.setTitle(novelEntity.getTitle());
+        responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
+        responseGetNovelDto.setSummary(novelEntity.getSummary());
+        responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+        responseGetNovelDto.setBanned(novelEntity.isBanned());
+        return responseGetNovelDto;
+    }
+
+    // 소설 차단/해제 (관리자용)
+    @Transactional
+    public ResponseEntity<?> toggleNovelBan(long novelId, User user) {
         try {
-            var tagResponse = tagService.getTagsByNovelId(novelEntity.getNovelId());
-            dto.setTags(tagResponse.getTagNames());
+            log.info("toggleNovelBan 호출됨 - novelId: {}, user: {}", novelId, user != null ? user.getId() : "null");
+            
+            // 관리자 권한 확인
+            if (user == null) {
+                log.warn("사용자가 null입니다.");
+                return ResponseEntity.status(403).body(Map.of("error", "관리자 권한이 필요합니다."));
+            }
+            
+            if (user.getAuthorityId() == null) {
+                log.warn("사용자 권한 ID가 null입니다. 사용자: {}", user.getId());
+                return ResponseEntity.status(403).body(Map.of("error", "관리자 권한이 필요합니다."));
+            }
+            
+            log.info("사용자 권한 ID: {}, 관리자 권한(3)과 비교: {}", user.getAuthorityId(), user.getAuthorityId() == 3L);
+            
+            if (user.getAuthorityId() != 3L) {
+                log.warn("관리자 권한이 아닙니다. 사용자: {}, 권한: {}", user.getId(), user.getAuthorityId());
+                return ResponseEntity.status(403).body(Map.of("error", "관리자 권한이 필요합니다."));
+            }
+
+            NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
+            if (novelEntity == null) {
+                log.warn("소설을 찾을 수 없습니다. novelId: {}", novelId);
+                return ResponseEntity.status(404).body(Map.of("error", "소설을 찾을 수 없습니다."));
+            }
+
+            // 현재 차단 상태를 반전
+            boolean currentBanStatus = novelEntity.isBanned();
+            boolean newBanStatus = !currentBanStatus;
+            log.info("소설 차단 상태 변경 - novelId: {}, 현재: {}, 새로운: {}", novelId, currentBanStatus, newBanStatus);
+            
+            novelEntity.updateIsBanned(newBanStatus);
+            novelRepository.save(novelEntity);
+            
+            // 저장 후 실제 데이터베이스에서 다시 조회하여 확인
+            NovelEntity savedNovel = novelRepository.findByNovelId(novelId);
+            log.info("데이터베이스 저장 후 실제 isBanned 값: {}", savedNovel.isBanned());
+
+            String message = newBanStatus ? "소설이 차단되었습니다." : "소설 차단이 해제되었습니다.";
+            log.info("소설 차단/해제 성공 - novelId: {}, 메시지: {}", novelId, message);
+            
+            return ResponseEntity.ok(Map.of(
+                "message", message,
+                "isBanned", newBanStatus,
+                "novelId", novelId
+            ));
         } catch (Exception e) {
-            log.warn("태그 정보 조회 실패: novelId={}, error={}", novelEntity.getNovelId(), e.getMessage());
-            dto.setTags(new ArrayList<>());
+            log.error("소설 차단/해제 중 오류 발생", e);
+            return ResponseEntity.status(500).body(Map.of("error", "소설 차단/해제에 실패했습니다."));
         }
-        
-        return dto;
     }
 }

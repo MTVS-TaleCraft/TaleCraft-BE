@@ -23,8 +23,21 @@ public class BookmarkController {
 
     @GetMapping
     public ResponseEntity<?> getAllBookmarks(@AuthenticationPrincipal User user) {
+        log.info("북마크 목록 조회 요청: userId={}", user != null ? user.getId() : "null");
+        log.info("사용자 정보: {}", user);
+        
+        if (user == null) {
+            log.warn("사용자가 인증되지 않음");
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", false);
+            response.put("error", "로그인이 필요합니다.");
+            response.put("bookmarkList", new java.util.ArrayList<>());
+            return ResponseEntity.ok().body(response);
+        }
+        
         BookmarkListResponseDTO responseDTO = bookmarkService.getBookmark(user);
-
+        log.info("북마크 목록 조회 결과: userId={}, bookmarkCount={}", user.getId(), responseDTO.getBookmarkList().size());
+        
         return ResponseEntity.ok().body(responseDTO);
     }
 
