@@ -63,7 +63,7 @@ public class JwtFilter extends OncePerRequestFilter {
             logger.info("Excluding novels list path");
             return true;
         }
-        if (path.startsWith("/api/novels/") && "GET".equals(method) && !path.equals("/api/novels/my") && !path.contains("/bookmarks/") && !path.equals("/api/novels/bookmarks")) {
+        if (path.startsWith("/api/novels/") && "GET".equals(method) && !path.equals("/api/novels/my") && !path.contains("/bookmarks/") && !path.equals("/api/novels/bookmarks") && !path.contains("/like")) {
             logger.info("Excluding novel detail path");
             return true;
         }
