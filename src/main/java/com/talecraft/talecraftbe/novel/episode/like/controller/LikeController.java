@@ -19,10 +19,10 @@ public class LikeController {
     }
 
     @GetMapping()
-    public ResponseEntity<?> getLike(@AuthenticationPrincipal User user, @PathVariable long novelId, @PathVariable long episodeId) {
+    public ResponseEntity<?> getLike(@AuthenticationPrincipal User user, @PathVariable long novelId, @RequestParam(required = false) Long episodeId) {
         log.info("GET : /novels/{}/like", novelId);
 
-        LikeListResponseDTO responseDTO = likeService.getLike(user, novelId);
+        LikeListResponseDTO responseDTO = likeService.getLike(user, novelId, episodeId);
 
         return ResponseEntity.ok().body(responseDTO);
     }

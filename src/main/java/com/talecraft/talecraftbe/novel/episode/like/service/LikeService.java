@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LikeService {
@@ -47,11 +48,22 @@ public class LikeService {
     }
 
     @Transactional(readOnly = true)
-    public LikeListResponseDTO getLike(User user, long novelId) {
+    public LikeListResponseDTO getLike(User user, long novelId, Long episodeId) {
         List<Like> likeList = likeRepository.findAllByUserAndEpisode_Novel_NovelId(user, novelId);
 
         if(likeList.isEmpty())
             return new LikeListResponseDTO(null, "해당 작품의 좋아요한 목록이 없습니다.");
+
+        if(episodeId != null) {
+            Optional<Like> matchedLike = likeList.stream()
+                    .filter(like -> like.getEpisode() != null && episodeId.equals(like.getEpisode().getEpisodesId()))
+                    .findFirst();
+
+            if(matchedLike.isPresent())
+                return new LikeListResponseDTO(List.of(matchedLike.get().getLikeId()), "해당 회차를 좋아요한 상태입니다.");
+            else
+                return new LikeListResponseDTO(null, "해당 회차를 좋아요하지 않은 상태입니다.");
+        }
 
         List<Long> likeIdList = likeList.stream().map(Like::getLikeId).toList();
 
