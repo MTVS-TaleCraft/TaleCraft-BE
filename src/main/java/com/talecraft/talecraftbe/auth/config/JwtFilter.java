@@ -73,6 +73,14 @@ public class JwtFilter extends OncePerRequestFilter {
             logger.info("Excluding common tags path");
             return true;
         }
+        if (path.equals("/api/tags/default") && "GET".equals(method)) {
+            logger.info("Excluding default tags path");
+            return true;
+        }
+        if (path.startsWith("/api/tags/search/") && "GET".equals(method)) {
+            logger.info("Excluding tag search path");
+            return true;
+        }
         
         logger.info("Path {} will be filtered", path);
         return false;
