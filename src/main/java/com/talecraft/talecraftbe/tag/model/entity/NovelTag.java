@@ -7,22 +7,25 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @Entity
-@Table(name = "tags")
+@Table(name = "novel_tags")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Tag {
+@IdClass(NovelTag.NovelTagId.class)
+public class NovelTag {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "novel_id")
+    private Long novelId;
+    
+    @Id
     @Column(name = "tag_id")
     private Long tagId;
-    
-    @Column(name = "tag_name", nullable = false, unique = true)
-    private String tagName;
     
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -32,4 +35,15 @@ public class Tag {
     protected void onCreate() {
         createdAt = new java.util.Date();
     }
-}
+    
+    // 복합 기본키를 위한 내부 클래스
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @ToString
+    public static class NovelTagId implements Serializable {
+        private Long novelId;
+        private Long tagId;
+    }
+} 

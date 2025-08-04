@@ -48,8 +48,8 @@ public class TagController {
         log.info("Getting tags for novel: {}", novelId);
         
         try {
-            TagResponseDTO responseDTO = tagService.getTagsByNovelId(novelId);
-            return ResponseEntity.ok().body(responseDTO);
+            TagResponseDTO.NovelTagsResponse response = tagService.getTagsByNovelId(novelId);
+            return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             log.error("Error getting tags for novel {}: {}", novelId, e.getMessage());
             return ResponseEntity.badRequest().body("태그 조회 중 오류가 발생했습니다: " + e.getMessage());
@@ -62,12 +62,28 @@ public class TagController {
         log.info("Searching novels by tag: {}", tagName);
         
         try {
-            List<Long> novelIds = tagService.searchNovelsByTag(tagName);
+            TagResponseDTO.TagSearchResponse response = tagService.searchNovelsByTag(tagName);
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            log.error("Error searching novels by tag {}: {}", tagName, e.getMessage());
+            return ResponseEntity.badRequest().body("태그 검색 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+    
+    // 태그명으로 작품 검색 (소설 상세 정보 포함)
+    @GetMapping("/search/novels")
+    public ResponseEntity<?> searchNovelsByTagWithDetails(@RequestParam String tagName) {
+        log.info("Searching novels by tag with details: {}", tagName);
+        
+        try {
+            List<com.talecraft.talecraftbe.novel.dto.response.ResponseGetNovelDto> novels = tagService.searchNovelsByTagWithDetails(tagName);
             
             Map<String, Object> response = new HashMap<>();
             response.put("tagName", tagName);
-            response.put("novelIds", novelIds);
-            response.put("count", novelIds.size());
+            response.put("novelList", novels);
+            response.put("totalElements", novels.size());
+            response.put("page", 0);
+            response.put("totalPages", 1);
             
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
@@ -115,7 +131,7 @@ public class TagController {
         }
     }
     
-    // 태그명으로 태그 검색
+    // 태그명으로 태그 검색 (기본 태그들)
     @GetMapping("/search/tags")
     public ResponseEntity<?> searchTagsByTagName(@RequestParam String tagName) {
         log.info("Searching tags by name: {}", tagName);
@@ -124,7 +140,7 @@ public class TagController {
             List<com.talecraft.talecraftbe.tag.model.entity.Tag> tags = tagService.searchTagsByTagName(tagName);
             
             Map<String, Object> response = new HashMap<>();
-            response.put("searchTerm", tagName);
+            response.put("tagName", tagName);
             response.put("tags", tags);
             response.put("count", tags.size());
             
@@ -135,7 +151,7 @@ public class TagController {
         }
     }
     
-    // 태그 존재 여부 확인
+    // 특정 작품의 특정 태그 존재 여부 확인
     @GetMapping("/novels/{novelId}/check")
     public ResponseEntity<?> checkTagExists(@PathVariable Long novelId, @RequestParam String tagName) {
         log.info("Checking if tag exists: {} for novel: {}", tagName, novelId);
@@ -150,50 +166,92 @@ public class TagController {
             
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
-            log.error("Error checking tag existence for novel {} and tag {}: {}", novelId, tagName, e.getMessage());
-            return ResponseEntity.badRequest().body("태그 확인 중 오류가 발생했습니다: " + e.getMessage());
+            log.error("Error checking tag existence for novel {}: {}", novelId, e.getMessage());
+            return ResponseEntity.badRequest().body("태그 존재 여부 확인 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
-
+    
     // 기본 태그 목록 조회
     @GetMapping("/common")
     public ResponseEntity<?> getCommonTags() {
         log.info("Getting common tags");
         
         try {
-            log.info("Calling tagService.getCommonTags()");
-            List<String> commonTags = tagService.getCommonTags();
-            log.info("Retrieved {} common tags: {}", commonTags.size(), commonTags);
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("commonTags", commonTags);
-            response.put("count", commonTags.size());
-            
-            log.info("Returning response: {}", response);
+            TagResponseDTO.TagListResponse response = tagService.getCommonTags();
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
-            log.error("Error getting common tags: {}", e.getMessage(), e);
+            log.error("Error getting common tags: {}", e.getMessage());
             return ResponseEntity.badRequest().body("기본 태그 조회 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
-
-    // 기본 태그를 작품에 추가
-    @PostMapping("/novels/{novelId}/common/{tagName}")
-    public ResponseEntity<?> addCommonTagToNovel(@PathVariable Long novelId, @PathVariable String tagName) {
-        log.info("Adding common tag: {} to novel: {}", tagName, novelId);
+    
+    // 새 태그 생성
+    @PostMapping("/create")
+    public ResponseEntity<?> createTag(@RequestParam String tagName) {
+        log.info("Creating new tag: {}", tagName);
         
         try {
-            tagService.addCommonTagToNovel(novelId, tagName);
+            com.talecraft.talecraftbe.tag.model.entity.Tag tag = tagService.createTag(tagName);
             
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "기본 태그가 성공적으로 추가되었습니다.");
-            response.put("novelId", novelId);
-            response.put("addedTag", tagName);
+            response.put("message", "태그가 성공적으로 생성되었습니다.");
+            response.put("tagId", tag.getTagId());
+            response.put("tagName", tag.getTagName());
             
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
-            log.error("Error adding common tag {} to novel {}: {}", tagName, novelId, e.getMessage());
-            return ResponseEntity.badRequest().body("기본 태그 추가 중 오류가 발생했습니다: " + e.getMessage());
+            log.error("Error creating tag {}: {}", tagName, e.getMessage());
+            return ResponseEntity.badRequest().body("태그 생성 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+    
+    // 기본 태그만 반환
+    @GetMapping("/default")
+    public ResponseEntity<?> getDefaultTags() {
+        log.info("Getting default tags");
+        
+        try {
+            TagResponseDTO.TagListResponse response = tagService.getDefaultTagsOnly();
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            log.error("Error getting default tags: {}", e.getMessage());
+            return ResponseEntity.badRequest().body("기본 태그 조회 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+    
+    // 사용자 추가 태그만 반환
+    @GetMapping("/user-added")
+    public ResponseEntity<?> getUserAddedTags() {
+        log.info("Getting user added tags");
+        
+        try {
+            TagResponseDTO.TagListResponse response = tagService.getUserAddedTagsOnly();
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            log.error("Error getting user added tags: {}", e.getMessage());
+            return ResponseEntity.badRequest().body("사용자 추가 태그 조회 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+    
+    // 모든 태그를 기본/사용자 추가로 구분해서 반환
+    @GetMapping("/all-categorized")
+    public ResponseEntity<?> getAllTagsCategorized() {
+        log.info("Getting all tags categorized");
+        
+        try {
+            TagResponseDTO.TagListResponse defaultTags = tagService.getDefaultTagsOnly();
+            TagResponseDTO.TagListResponse userAddedTags = tagService.getUserAddedTagsOnly();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("defaultTags", defaultTags.getTagNames());
+            response.put("userAddedTags", userAddedTags.getTagNames());
+            response.put("totalDefaultTags", defaultTags.getTotalCount());
+            response.put("totalUserAddedTags", userAddedTags.getTotalCount());
+            
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            log.error("Error getting categorized tags: {}", e.getMessage());
+            return ResponseEntity.badRequest().body("태그 분류 조회 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
 } 

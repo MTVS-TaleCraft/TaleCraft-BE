@@ -6,6 +6,7 @@ import com.talecraft.talecraftbe.novel.dto.request.RequestPostNovelDto;
 import com.talecraft.talecraftbe.novel.dto.response.*;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
+import com.talecraft.talecraftbe.tag.service.TagService;
 import com.talecraft.talecraftbe.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +25,12 @@ import java.util.stream.Collectors;
 @Service
 public class NovelService {
     private final NovelRepository novelRepository;
+    private final TagService tagService;
 
     @Autowired
-    public NovelService(NovelRepository novelRepository) {
+    public NovelService(NovelRepository novelRepository, TagService tagService) {
         this.novelRepository = novelRepository;
+        this.tagService = tagService;
     }
 
     @Transactional
@@ -92,6 +95,15 @@ public class NovelService {
             responseGetNovelDto.setAvailability(novelEntity.getAvailability());
             responseGetNovelDto.setBanned(novelEntity.isBanned());
             
+            // 태그 정보 추가
+            try {
+                var tagResponse = tagService.getTagsByNovelId(novelId);
+                responseGetNovelDto.setTags(tagResponse.getTagNames());
+            } catch (Exception e) {
+                log.warn("태그 정보를 가져오는데 실패했습니다. novelId: {}, error: {}", novelId, e.getMessage());
+                responseGetNovelDto.setTags(List.of());
+            }
+            
             log.info("getNovel - novelId: {}, isBanned: {}", novelId, novelEntity.isBanned());
             log.info("getNovel - responseGetNovelDto.isBanned: {}", responseGetNovelDto.isBanned());
             
@@ -118,6 +130,16 @@ public class NovelService {
                 responseGetNovelDto.setSummary(novelEntity.getSummary());
                 responseGetNovelDto.setAvailability(novelEntity.getAvailability());
                 responseGetNovelDto.setBanned(novelEntity.isBanned());
+                
+                // 태그 정보 추가
+                try {
+                    var tagResponse = tagService.getTagsByNovelId(novelId);
+                    responseGetNovelDto.setTags(tagResponse.getTagNames());
+                } catch (Exception e) {
+                    log.warn("태그 정보를 가져오는데 실패했습니다. novelId: {}, error: {}", novelId, e.getMessage());
+                    responseGetNovelDto.setTags(List.of());
+                }
+                
                 return new ResponseEntity<>(responseGetNovelDto, HttpStatus.OK);
                 //
             }else{
@@ -218,6 +240,16 @@ public class NovelService {
         responseGetNovelDto.setSummary(novelEntity.getSummary());
         responseGetNovelDto.setAvailability(novelEntity.getAvailability());
         responseGetNovelDto.setBanned(novelEntity.isBanned());
+        
+        // 태그 정보 추가
+        try {
+            var tagResponse = tagService.getTagsByNovelId(novelEntity.getNovelId());
+            responseGetNovelDto.setTags(tagResponse.getTagNames());
+        } catch (Exception e) {
+            log.warn("태그 정보를 가져오는데 실패했습니다. novelId: {}, error: {}", novelEntity.getNovelId(), e.getMessage());
+            responseGetNovelDto.setTags(List.of());
+        }
+        
         return responseGetNovelDto;
     }
 

@@ -27,7 +27,7 @@ public interface NovelReportRepository extends JpaRepository<NovelReport, Long> 
     @Query("SELECT COUNT(nr) FROM NovelReport nr WHERE nr.novelId = :novelId")
     long countByNovelId(@Param("novelId") Long novelId);
     
-    // 신고된 소설 ID 목록 조회 (중복 제거)
+    // 신고된 소설의 고유 ID 목록 조회
     @Query("SELECT DISTINCT nr.novelId FROM NovelReport nr")
     List<Long> findDistinctNovelIds();
 } 

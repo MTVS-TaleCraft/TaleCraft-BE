@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
@@ -17,6 +19,7 @@ public class ResponseGetNovelDto {
     private String titleImage;
     private String summary;
     private Availability availability;
+    private List<String> tags;
     boolean isFinished;
     boolean isDeleted;
     boolean isBanned;
