@@ -6,11 +6,13 @@ import com.talecraft.talecraftbe.novel.dto.request.RequestPostNovelDto;
 import com.talecraft.talecraftbe.novel.dto.response.*;
 import com.talecraft.talecraftbe.novel.service.NovelService;
 import com.talecraft.talecraftbe.user.entity.User;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/novels")
 @CrossOrigin(origins = "http://localhost:3000")
@@ -60,6 +62,7 @@ public class NovelController {
     //내 작품 전체 조회
     @GetMapping("/my")
     public ResponseEntity<ResponseGetNovelListDto> getMyAllNovels(@AuthenticationPrincipal User user) {
+        log.info("user : {}", user);
         return novelService.getMyNovelList(user);
     }
 
