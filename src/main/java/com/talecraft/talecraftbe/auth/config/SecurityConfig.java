@@ -82,7 +82,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/tags/common").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tags/default").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tags/search/**").permitAll()
-                        .requestMatchers("/api/ai/**").permitAll()
 
                         // 3-1) swagger 리소스
                         .requestMatchers("/swagger-ui/**").permitAll()
