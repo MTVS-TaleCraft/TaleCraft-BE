@@ -181,7 +181,7 @@ public class NovelService {
 
             ResponseGetNovelListDto response = new ResponseGetNovelListDto();
             response.setNovelList(responseGetNovelDtoList);
-
+            response.setTotalElements(novelRepository.countByIsDeleted(false));
             return ResponseEntity.ok(response);
 
         } catch (RuntimeException e) {

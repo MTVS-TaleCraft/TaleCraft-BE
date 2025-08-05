@@ -33,7 +33,7 @@ public class EpisodeEntity {
     @Comment("소설 화수 제목")
     private String title;
 
-    @Column(length = 5000)
+    @Column(length = 20000)
     @Comment("소설 화수 내용")
     private String content;
 

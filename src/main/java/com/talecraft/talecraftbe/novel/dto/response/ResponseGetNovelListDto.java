@@ -9,6 +9,6 @@ public class ResponseGetNovelListDto {
     private List<ResponseGetNovelDto> novelList;
     private int page;
     private int pageSize;
-    private int totalElements;
+    private long totalElements;
     private int totalPages;
 }
