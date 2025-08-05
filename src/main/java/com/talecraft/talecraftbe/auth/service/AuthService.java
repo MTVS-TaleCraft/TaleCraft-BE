@@ -108,9 +108,14 @@ public class AuthService {
         String jwt = jwtProvider.generateToken(auth);
         logger.info("JWT token generated: {}", jwt.substring(0, Math.min(jwt.length(), 20)) + "...");
         
-        // JWT 토큰을 쿠키로 설정 (배포 환경 호환성을 위해 헤더로 직접 설정)
-        String cookieValue = "JwtToken=" + jwt + "; HttpOnly; Path=/; SameSite=Lax";
-        response.setHeader("Set-Cookie", cookieValue);
+        // JWT 토큰을 쿠키로 설정
+        Cookie cookie = new Cookie("JwtToken", jwt);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // HTTP 환경에서 쿠키 전송을 위해 false로 설정
+        cookie.setPath("/");
+        // 도메인 설정 제거 (브라우저가 자동으로 현재 도메인에 설정)
+        // cookie.setDomain("localhost"); // 로컬 개발 환경을 위한 도메인 설정
+        response.addCookie(cookie);
         logger.info("JWT cookie set");
         
         return jwt;
@@ -131,9 +136,15 @@ public class AuthService {
         // SecurityContext 초기화
         SecurityContextHolder.clearContext();
         
-        // JWT 쿠키 제거 (배포 환경 호환성을 위해 헤더로 직접 설정)
-        String cookieValue = "JwtToken=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0";
-        response.setHeader("Set-Cookie", cookieValue);
+        // JWT 쿠키 제거
+        Cookie cookie = new Cookie("JwtToken", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // HTTP 환경에서 쿠키 전송을 위해 false로 설정
+        cookie.setPath("/");
+        // 도메인 설정 제거 (브라우저가 자동으로 현재 도메인에 설정)
+        // cookie.setDomain("localhost"); // 로컬 개발 환경을 위한 도메인 설정
+        cookie.setMaxAge(0); // 쿠키 즉시 만료
+        response.addCookie(cookie);
         
         logger.info("Logout completed successfully");
     }
