@@ -113,10 +113,11 @@ public class AuthService {
         cookie.setHttpOnly(true);
         cookie.setSecure(false); // HTTP 환경에서 쿠키 전송을 위해 false로 설정
         cookie.setPath("/");
-        // 도메인 설정 제거 (브라우저가 자동으로 현재 도메인에 설정)
-        // cookie.setDomain("localhost"); // 로컬 개발 환경을 위한 도메인 설정
+        cookie.setMaxAge(24 * 60 * 60); // 24시간 유효
+        // SameSite 설정을 위한 응답 헤더 추가
+        response.setHeader("Set-Cookie", "JwtToken=" + jwt + "; HttpOnly; Path=/; Max-Age=86400; SameSite=None");
         response.addCookie(cookie);
-        logger.info("JWT cookie set");
+        logger.info("JWT cookie set with SameSite=None");
         
         return jwt;
     }
@@ -141,9 +142,9 @@ public class AuthService {
         cookie.setHttpOnly(true);
         cookie.setSecure(false); // HTTP 환경에서 쿠키 전송을 위해 false로 설정
         cookie.setPath("/");
-        // 도메인 설정 제거 (브라우저가 자동으로 현재 도메인에 설정)
-        // cookie.setDomain("localhost"); // 로컬 개발 환경을 위한 도메인 설정
         cookie.setMaxAge(0); // 쿠키 즉시 만료
+        // SameSite 설정을 위한 응답 헤더 추가
+        response.setHeader("Set-Cookie", "JwtToken=; HttpOnly; Path=/; Max-Age=0; SameSite=None");
         response.addCookie(cookie);
         
         logger.info("Logout completed successfully");
