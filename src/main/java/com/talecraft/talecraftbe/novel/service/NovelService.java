@@ -4,6 +4,7 @@ package com.talecraft.talecraftbe.novel.service;
 import com.talecraft.talecraftbe.novel.dto.request.RequestPatchNovelDto;
 import com.talecraft.talecraftbe.novel.dto.request.RequestPostNovelDto;
 import com.talecraft.talecraftbe.novel.dto.response.*;
+import com.talecraft.talecraftbe.novel.episode.repository.EpisodeRepository;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import com.talecraft.talecraftbe.tag.service.TagService;
@@ -26,11 +27,12 @@ import java.util.stream.Collectors;
 public class NovelService {
     private final NovelRepository novelRepository;
     private final TagService tagService;
-
+    private final EpisodeRepository episodeRepository;
     @Autowired
-    public NovelService(NovelRepository novelRepository, TagService tagService) {
+    public NovelService(NovelRepository novelRepository, TagService tagService, EpisodeRepository episodeRepository) {
         this.novelRepository = novelRepository;
         this.tagService = tagService;
+        this.episodeRepository = episodeRepository;
     }
 
     @Transactional
@@ -51,8 +53,7 @@ public class NovelService {
             return new ResponseEntity<>(responsePostNovelDto, HttpStatus.CREATED);
         }
         catch (RuntimeException e){
-            //더강력한로깅으로 바꿀것
-            e.printStackTrace();
+            log.info(String.valueOf(e));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -130,7 +131,6 @@ public class NovelService {
                 responseGetNovelDto.setSummary(novelEntity.getSummary());
                 responseGetNovelDto.setAvailability(novelEntity.getAvailability());
                 responseGetNovelDto.setBanned(novelEntity.isBanned());
-                
                 // 태그 정보 추가
                 try {
                     var tagResponse = tagService.getTagsByNovelId(novelId);
@@ -213,8 +213,12 @@ public class NovelService {
                     responseGetNovelDtoList.add(responseGetNovelDto);
                 }
             }
+            //에피소드 개수 세팅
+            for(ResponseGetNovelDto responseGetNovelDto : responseGetNovelDtoList) {
+                responseGetNovelDto.setEpisodeCount(episodeRepository.countByNovel_NovelIdAndIsDeleted(responseGetNovelDto.getNovelId(), false));
+                log.info("Episode Count= {}",responseGetNovelDto.getEpisodeCount());
+            }
             responseGetNovelListDto.setNovelList(responseGetNovelDtoList);
-
             return new ResponseEntity<>(responseGetNovelListDto,HttpStatus.OK);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);

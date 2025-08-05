@@ -23,4 +23,5 @@ public class ResponseGetNovelDto {
     boolean isFinished;
     boolean isDeleted;
     boolean isBanned;
+    private long episodeCount;
 }

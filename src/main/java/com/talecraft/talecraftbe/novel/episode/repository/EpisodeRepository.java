@@ -7,4 +7,8 @@ import java.util.List;
 
 public interface EpisodeRepository extends JpaRepository<EpisodeEntity, Long> {
     List<EpisodeEntity> findByNovelNovelIdAndIsDeletedFalse(Long novelId);
+
+    long countByIsDeleted(Boolean isDeleted);
+
+    long countByNovel_NovelIdAndIsDeleted(long novelNovelId, Boolean isDeleted);
 }
