@@ -16,4 +16,7 @@ public interface NovelRepository extends JpaRepository< NovelEntity, Long> {
     List<NovelEntity> findAllByUserUserName(String userUserName);
 
     List<NovelEntity> findAllByUserId(String userId);
+
+
+    long countByIsDeleted(boolean b);
 }

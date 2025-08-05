@@ -116,7 +116,9 @@ public class AuthService {
         // 도메인 설정 제거 (브라우저가 자동으로 현재 도메인에 설정)
         // cookie.setDomain("localhost"); // 로컬 개발 환경을 위한 도메인 설정
         response.addCookie(cookie);
-        logger.info("JWT cookie set");
+        logger.info("JWT cookie set with value: {}", jwt.substring(0, Math.min(jwt.length(), 20)) + "...");
+        logger.info("Cookie details - Name: {}, Path: {}, HttpOnly: {}, Secure: {}", 
+                   cookie.getName(), cookie.getPath(), cookie.isHttpOnly(), cookie.getSecure());
         
         return jwt;
     }
