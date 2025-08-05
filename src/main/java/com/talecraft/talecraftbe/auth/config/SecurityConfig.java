@@ -43,7 +43,6 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "https://tale-craft-three.vercel.app",
-
                 "http://localhost:3000",  // 로컬 개발용
                 "http://localhost:8080",  // 필요하다면 추가
                 "http://localhost:8081",  // 로컬 백엔드
