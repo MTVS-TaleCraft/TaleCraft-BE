@@ -213,9 +213,11 @@ public class AIService {
         EpisodeEntity episodeEntity = episodeRepository.findById(episodeId).orElseThrow(
                 () -> new NoSuchElementException("에피소드ID를 찾을 수 없습니다!")
         );
-
-        if(!episodeEntity.getNovel().getUser().equals(user)) {
+        log.warn("user = {}",user.getId());
+        log.warn("episodeUser= {}",episodeEntity.getNovel().getUser().getId());
+        if(!episodeEntity.getNovel().getUser().getId().equals(user.getId())) {
             if(!user.getAuthorities().contains("ROLE_ADMIN"))
+                log.info(user.getAuthorities().toString());
                 throw new AccessDeniedException("권한이 없습니다!");
         }
     }
