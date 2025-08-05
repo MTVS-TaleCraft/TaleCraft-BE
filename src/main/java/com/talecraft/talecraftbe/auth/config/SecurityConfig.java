@@ -71,6 +71,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/find-userid").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/find-password").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/profile").permitAll()
 
                         // 2) 이메일 인증 API
                         .requestMatchers(HttpMethod.POST, "/api/verification/send").permitAll()

@@ -59,6 +59,10 @@ public class JwtFilter extends OncePerRequestFilter {
             logger.info("Excluding find-password path");
             return true;
         }
+        if (path.equals("/api/auth/profile") && "GET".equals(method)) {
+            logger.info("Excluding profile path");
+            return true;
+        }
         
         // 이메일 인증 관련 경로 제외
         if (path.startsWith("/api/verification/")) {
