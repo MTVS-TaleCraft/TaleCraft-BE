@@ -45,7 +45,8 @@ public class SecurityConfig {
                 "https://tale-craft-three.vercel.app",
                 "https://tale-craft-cnbbfdayr-emflazlwm62-9053s-projects.vercel.app",
                 "http://localhost:3000",  // 로컬 개발용
-                "http://localhost:8080"   // 필요하다면 추가
+                "http://localhost:8080",  // 필요하다면 추가
+                "http://localhost:8081"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
