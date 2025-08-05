@@ -14,7 +14,7 @@ import com.talecraft.talecraftbe.ai.repository.ChatListRepository;
 import com.talecraft.talecraftbe.ai.repository.ChatMessageRepository;
 import com.talecraft.talecraftbe.novel.episode.model.entity.EpisodeEntity;
 import com.talecraft.talecraftbe.novel.episode.repository.EpisodeRepository;
-import com.talecraft.talecraftbe.novel.episode.service.EpisodeService;
+import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import com.talecraft.talecraftbe.user.entity.User;
 import lombok.extern.slf4j.Slf4j;
@@ -42,15 +42,18 @@ public class AIService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatListRepository chatListRepository;
     private final EpisodeRepository episodeRepository;
+    private final NovelRepository novelRepository;
 
     public AIService(RestTemplate restTemplate,
                      ChatMessageRepository chatMessageRepository,
                      ChatListRepository chatListRepository,
-                     EpisodeRepository episodeRepository) {
+                     EpisodeRepository episodeRepository,
+                     NovelRepository novelRepository) {
         this.restTemplate = restTemplate;
         this.chatMessageRepository = chatMessageRepository;
         this.chatListRepository = chatListRepository;
         this.episodeRepository = episodeRepository;
+        this.novelRepository = novelRepository;
     }
 
     public AddAIResponseDTO requestAI(AddAIRequestDTO requestDTO) {
@@ -209,15 +212,14 @@ public class AIService {
             return null;
     }
 
-    public void checkAccess(User user, Long episodeId) {
-        EpisodeEntity episodeEntity = episodeRepository.findById(episodeId).orElseThrow(
-                () -> new NoSuchElementException("에피소드ID를 찾을 수 없습니다!")
+    public void checkAccess(User user, Long novelId) {
+        NovelEntity novelEntity = novelRepository.findById(novelId).orElseThrow(
+                () -> new NoSuchElementException("소설을 찾을 수 없습니다!\n" +
+                        "찾은 소설ID : " + novelId)
         );
-        log.warn("user = {}",user.getId());
-        log.warn("episodeUser= {}",episodeEntity.getNovel().getUser().getId());
-        if(!episodeEntity.getNovel().getUser().getId().equals(user.getId())) {
+
+        if(!novelEntity.getUser().equals(user)) {
             if(!user.getAuthorities().contains("ROLE_ADMIN"))
-                log.info(user.getAuthorities().toString());
                 throw new AccessDeniedException("권한이 없습니다!");
         }
     }

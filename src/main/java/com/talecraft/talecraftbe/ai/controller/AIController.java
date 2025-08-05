@@ -60,7 +60,7 @@ public class AIController {
         log.info("POST : /api/ai");
         log.info("requestDTO: {}", requestDTO);
 
-        aiService.checkAccess(user, requestDTO.getEpisodeId());
+        aiService.checkAccess(user, requestDTO.getNovelId());
 
         if(requestDTO.isUseChatList() && requestDTO.getEpisodeId() != null) {
             requestDTO.setChatListId(aiService.addChatList(requestDTO));

@@ -16,6 +16,8 @@ import java.util.List;
 @EqualsAndHashCode
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AddAIRequestDTO {
+    @Schema(description = "소설 아이디", example = "1")
+    private Long novelId;
     @Schema(description = "회차 아이디", example = "1")
     private Long episodeId;
     @Schema(description = "챗목록 아이디", example = "1")
