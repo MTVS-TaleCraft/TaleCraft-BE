@@ -5,6 +5,7 @@ import com.talecraft.talecraftbe.novel.dto.request.RequestPatchNovelDto;
 import com.talecraft.talecraftbe.novel.dto.request.RequestPostNovelDto;
 import com.talecraft.talecraftbe.novel.dto.response.*;
 import com.talecraft.talecraftbe.novel.episode.repository.EpisodeRepository;
+import com.talecraft.talecraftbe.novel.model.entity.Availability;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import com.talecraft.talecraftbe.tag.service.TagService;
@@ -160,12 +161,12 @@ public class NovelService {
 
             // 검색 조건 분기
             if (type == null || keyword == null || keyword.isBlank()) {
-                novelEntityList = novelRepository.findAll();
+                novelEntityList = novelRepository.findAllByAvailability(Availability.PUBLIC);
             } else {
                 novelEntityList = switch (type) {
-                    case "title" -> novelRepository.findAllByTitle(keyword);
-                    case "userName" -> novelRepository.findAllByUserUserName(keyword);
-                    case "userId" -> novelRepository.findAllByUserId(keyword);
+                    case "title" -> novelRepository.findAllByTitleAndAvailability(keyword,Availability.PUBLIC);
+                    case "userName" -> novelRepository.findAllByUserUserNameAndAvailability(keyword,Availability.PUBLIC);
+                    case "userId" -> novelRepository.findAllByUserIdAndAvailability(keyword,Availability.PUBLIC);
                     default -> throw new IllegalArgumentException("유효하지 않은 검색 타입입니다: " + type);
                 };
             }
