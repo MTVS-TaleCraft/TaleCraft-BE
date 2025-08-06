@@ -93,10 +93,6 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/api-docs/**").permitAll()
 
-                        // 3-2) 관리자 전용 API (관리자 권한 필요)
-                        .requestMatchers(HttpMethod.GET, "/api/auth/admin/novels").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/auth/admin/novels/{novelId}/ban").hasRole("ADMIN")
-
                         // 4) 나머지 요청은 인증 필요
                         .anyRequest().authenticated()
                 )

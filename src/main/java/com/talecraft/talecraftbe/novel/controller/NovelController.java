@@ -57,14 +57,16 @@ public class NovelController {
             return novelService.getNovelList(keyword,type);
     }
 
-
-
     //내 작품 전체 조회
     @GetMapping("/my")
     public ResponseEntity<ResponseGetNovelListDto> getMyAllNovels(@AuthenticationPrincipal User user) {
         return novelService.getMyNovelList(user);
     }
 
-
+    // 소설 차단/해제 (관리자용)
+    @PatchMapping("/{novelId}/ban")
+    public ResponseEntity<?> toggleNovelBan(@PathVariable long novelId, @AuthenticationPrincipal User user) {
+        return novelService.toggleNovelBan(novelId, user);
+    }
 
 }
