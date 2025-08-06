@@ -126,7 +126,7 @@ public class NovelReportService {
         List<Long> reportedNovelIds = novelReportRepository.findDistinctNovelIds();
         
         // 2. 차단된 소설 ID 목록 가져오기
-        List<Long> bannedNovelIds = novelRepository.findNovelIdsByBannedTrue();
+        List<Long> bannedNovelIds = novelRepository.findNovelIdsByIsBannedTrue();
         
         // 3. 두 목록을 합치고 중복 제거
         reportedNovelIds.addAll(bannedNovelIds);
