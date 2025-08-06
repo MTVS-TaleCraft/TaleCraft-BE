@@ -9,6 +9,7 @@ import com.talecraft.talecraftbe.auth.dto.FindUserIdResponse;
 import com.talecraft.talecraftbe.auth.dto.FindAccountResponse;
 import com.talecraft.talecraftbe.auth.dto.UserDetailResponse;
 import com.talecraft.talecraftbe.auth.service.AuthService;
+import com.talecraft.talecraftbe.novel.dto.response.ResponseGetNovelListDto;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -131,6 +132,31 @@ public class AuthController {
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // 관리자용 소설 조회 (차단된 소설 포함)
+    @GetMapping("/admin/novels")
+    public ResponseEntity<ResponseGetNovelListDto> getAllNovelsForAdmin(@RequestParam(value = "value",required = false) String keyword,@RequestParam(value="type", required=false) String type) {
+        try {
+            ResponseGetNovelListDto novels = authService.getNovelListForAdmin(keyword, type);
+            return ResponseEntity.ok(novels);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // 소설 차단/해제 (관리자용)
+    @PatchMapping("/admin/novels/{novelId}/ban")
+    public ResponseEntity<?> toggleNovelBan(@PathVariable long novelId) {
+        try {
+            return authService.toggleNovelBan(novelId);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", "소설 차단/해제에 실패했습니다."));
         }
     }
 

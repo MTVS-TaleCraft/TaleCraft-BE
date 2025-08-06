@@ -8,6 +8,10 @@ import com.talecraft.talecraftbe.auth.dto.FindPasswordRequest;
 import com.talecraft.talecraftbe.auth.dto.UserDetailResponse;
 import com.talecraft.talecraftbe.user.entity.User;
 import com.talecraft.talecraftbe.user.repository.UserRepository;
+import com.talecraft.talecraftbe.novel.dto.response.ResponseGetNovelListDto;
+import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
+import com.talecraft.talecraftbe.novel.repository.NovelRepository;
+import com.talecraft.talecraftbe.novel.service.NovelService;
 import com.talecraft.talecraftbe.auth.config.JwtProvider;
 import com.talecraft.talecraftbe.verification.service.EmailVerificationService;
 import jakarta.servlet.http.Cookie;
@@ -21,12 +25,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import com.talecraft.talecraftbe.novel.dto.response.ResponseGetNovelDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 import java.util.Map;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
@@ -37,19 +44,25 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final EmailVerificationService emailVerificationService;
     private final JavaMailSender mailSender;
+    private final NovelRepository novelRepository;
+    private final NovelService novelService;
 
     public AuthService(UserRepository userRepo,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authManager,
                        JwtProvider jwtProvider,
                        EmailVerificationService emailVerificationService,
-                       JavaMailSender mailSender) {
+                       JavaMailSender mailSender,
+                       NovelRepository novelRepository,
+                       NovelService novelService) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.authManager = authManager;
         this.jwtProvider = jwtProvider;
         this.emailVerificationService = emailVerificationService;
         this.mailSender = mailSender;
+        this.novelRepository = novelRepository;
+        this.novelService = novelService;
     }
 
     /**
@@ -338,5 +351,120 @@ public class AuthService {
                 .toList();
     }
 
+    // 관리자용 소설 조회 (차단된 소설 포함)
+    public ResponseGetNovelListDto getNovelListForAdmin(String keyword, String type) {
+        try {
+            List<NovelEntity> novelEntityList;
+
+            // 검색 조건 분기
+            if (type == null || keyword == null || keyword.isBlank()) {
+                novelEntityList = novelRepository.findAll();
+            } else {
+                novelEntityList = switch (type) {
+                    case "title" -> novelRepository.findAllByTitle(keyword);
+                    case "userName" -> novelRepository.findAllByUserUserName(keyword);
+                    case "userId" -> novelRepository.findAllByUserId(keyword);
+                    default -> throw new IllegalArgumentException("유효하지 않은 검색 타입입니다: " + type);
+                };
+            }
+
+            // 차단된 소설도 포함 (필터링하지 않음)
+            List<ResponseGetNovelDto> responseGetNovelDtoList = novelEntityList.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+
+            ResponseGetNovelListDto response = new ResponseGetNovelListDto();
+            response.setNovelList(responseGetNovelDtoList);
+            response.setTotalElements(novelRepository.countByIsDeleted(false));
+            return response;
+
+        } catch (RuntimeException e) {
+            throw new RuntimeException("소설 검색 중 오류 발생", e);
+        }
+    }
+
+    // 소설 차단/해제 (관리자용)
+    public ResponseEntity<?> toggleNovelBan(long novelId) {
+        try {
+            logger.info("toggleNovelBan 호출됨 - novelId: {}", novelId);
+            
+            // 현재 인증된 사용자 가져오기
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                logger.warn("인증되지 않은 사용자입니다.");
+                return ResponseEntity.status(403).body(Map.of("error", "관리자 권한이 필요합니다."));
+            }
+            
+            User user = (User) authentication.getPrincipal();
+            if (user == null) {
+                logger.warn("사용자가 null입니다.");
+                return ResponseEntity.status(403).body(Map.of("error", "관리자 권한이 필요합니다."));
+            }
+            
+            if (user.getAuthorityId() == null) {
+                logger.warn("사용자 권한 ID가 null입니다. 사용자: {}", user.getId());
+                return ResponseEntity.status(403).body(Map.of("error", "관리자 권한이 필요합니다."));
+            }
+            
+            logger.info("사용자 권한 ID: {}, 관리자 권한(3)과 비교: {}", user.getAuthorityId(), user.getAuthorityId() == 3L);
+            
+            if (user.getAuthorityId() != 3L) {
+                logger.warn("관리자 권한이 아닙니다. 사용자: {}, 권한: {}", user.getId(), user.getAuthorityId());
+                return ResponseEntity.status(403).body(Map.of("error", "관리자 권한이 필요합니다."));
+            }
+
+            NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
+            if (novelEntity == null) {
+                logger.warn("소설을 찾을 수 없습니다. novelId: {}", novelId);
+                return ResponseEntity.status(404).body(Map.of("error", "소설을 찾을 수 없습니다."));
+            }
+
+            // 현재 차단 상태를 반전
+            boolean currentBanStatus = novelEntity.isBanned();
+            boolean newBanStatus = !currentBanStatus;
+            logger.info("소설 차단 상태 변경 - novelId: {}, 현재: {}, 새로운: {}", novelId, currentBanStatus, newBanStatus);
+            
+            novelEntity.updateIsBanned(newBanStatus);
+            novelRepository.save(novelEntity);
+            
+            // 저장 후 실제 데이터베이스에서 다시 조회하여 확인
+            NovelEntity savedNovel = novelRepository.findByNovelId(novelId);
+            logger.info("데이터베이스 저장 후 실제 isBanned 값: {}", savedNovel.isBanned());
+
+            String message = newBanStatus ? "소설이 차단되었습니다." : "소설 차단이 해제되었습니다.";
+            logger.info("소설 차단/해제 성공 - novelId: {}, 메시지: {}", novelId, message);
+            
+            return ResponseEntity.ok(Map.of(
+                "message", message,
+                "isBanned", newBanStatus,
+                "novelId", novelId
+            ));
+        } catch (Exception e) {
+            logger.error("소설 차단/해제 중 오류 발생", e);
+            return ResponseEntity.status(500).body(Map.of("error", "소설 차단/해제에 실패했습니다."));
+        }
+    }
+
+    private ResponseGetNovelDto convertToDto(NovelEntity novelEntity) {
+        ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
+        responseGetNovelDto.setNovelId(novelEntity.getNovelId());
+        setAuthor(novelEntity, responseGetNovelDto);
+        responseGetNovelDto.setTitle(novelEntity.getTitle());
+        responseGetNovelDto.setTitleImage(novelEntity.getTitleImage());
+        responseGetNovelDto.setSummary(novelEntity.getSummary());
+        responseGetNovelDto.setAvailability(novelEntity.getAvailability());
+        responseGetNovelDto.setBanned(novelEntity.isBanned());
+        
+        return responseGetNovelDto;
+    }
+
+    private void setAuthor(NovelEntity novelEntity, ResponseGetNovelDto response) {
+        if(novelEntity.getUser()!=null){
+            response.setAuthor(novelEntity.getUser().getUserName());
+        }else{
+            logger.info("user is null");
+            response.setAuthor("No Author");
+        }
+    }
 }
 

@@ -192,6 +192,8 @@ public class NovelService {
 
 
 
+
+
     //내 작품만 조회
     @Transactional
     public ResponseEntity<ResponseGetNovelListDto> getMyNovelList(@AuthenticationPrincipal User user) {
@@ -257,59 +259,5 @@ public class NovelService {
         return responseGetNovelDto;
     }
 
-    // 소설 차단/해제 (관리자용)
-    @Transactional
-    public ResponseEntity<?> toggleNovelBan(long novelId, User user) {
-        try {
-            log.info("toggleNovelBan 호출됨 - novelId: {}, user: {}", novelId, user != null ? user.getId() : "null");
-            
-            // 관리자 권한 확인
-            if (user == null) {
-                log.warn("사용자가 null입니다.");
-                return ResponseEntity.status(403).body(Map.of("error", "관리자 권한이 필요합니다."));
-            }
-            
-            if (user.getAuthorityId() == null) {
-                log.warn("사용자 권한 ID가 null입니다. 사용자: {}", user.getId());
-                return ResponseEntity.status(403).body(Map.of("error", "관리자 권한이 필요합니다."));
-            }
-            
-            log.info("사용자 권한 ID: {}, 관리자 권한(3)과 비교: {}", user.getAuthorityId(), user.getAuthorityId() == 3L);
-            
-            if (user.getAuthorityId() != 3L) {
-                log.warn("관리자 권한이 아닙니다. 사용자: {}, 권한: {}", user.getId(), user.getAuthorityId());
-                return ResponseEntity.status(403).body(Map.of("error", "관리자 권한이 필요합니다."));
-            }
 
-            NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
-            if (novelEntity == null) {
-                log.warn("소설을 찾을 수 없습니다. novelId: {}", novelId);
-                return ResponseEntity.status(404).body(Map.of("error", "소설을 찾을 수 없습니다."));
-            }
-
-            // 현재 차단 상태를 반전
-            boolean currentBanStatus = novelEntity.isBanned();
-            boolean newBanStatus = !currentBanStatus;
-            log.info("소설 차단 상태 변경 - novelId: {}, 현재: {}, 새로운: {}", novelId, currentBanStatus, newBanStatus);
-            
-            novelEntity.updateIsBanned(newBanStatus);
-            novelRepository.save(novelEntity);
-            
-            // 저장 후 실제 데이터베이스에서 다시 조회하여 확인
-            NovelEntity savedNovel = novelRepository.findByNovelId(novelId);
-            log.info("데이터베이스 저장 후 실제 isBanned 값: {}", savedNovel.isBanned());
-
-            String message = newBanStatus ? "소설이 차단되었습니다." : "소설 차단이 해제되었습니다.";
-            log.info("소설 차단/해제 성공 - novelId: {}, 메시지: {}", novelId, message);
-            
-            return ResponseEntity.ok(Map.of(
-                "message", message,
-                "isBanned", newBanStatus,
-                "novelId", novelId
-            ));
-        } catch (Exception e) {
-            log.error("소설 차단/해제 중 오류 발생", e);
-            return ResponseEntity.status(500).body(Map.of("error", "소설 차단/해제에 실패했습니다."));
-        }
-    }
 }
