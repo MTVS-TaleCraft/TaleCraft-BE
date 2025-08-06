@@ -218,7 +218,7 @@ public class AIService {
                         "찾은 소설ID : " + novelId)
         );
 
-        if(!novelEntity.getUser().equals(user)) {
+        if(!novelEntity.getUser().getId().equals(user.getId())) {
             if(!user.getAuthorities().contains("ROLE_ADMIN"))
                 throw new AccessDeniedException("권한이 없습니다!");
         }
