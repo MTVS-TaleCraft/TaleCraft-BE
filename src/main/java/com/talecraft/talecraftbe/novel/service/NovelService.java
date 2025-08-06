@@ -174,6 +174,7 @@ public class NovelService {
             // 관리자 페이지에서는 차단된 소설도 포함, 일반 페이지에서는 차단되지 않은 소설만
             List<NovelEntity> filteredNovelList = novelEntityList;
             
+            // 일반 사용자는 차단되지 않은 소설만 볼 수 있도록 필터링
             // TODO: 관리자 권한 확인 로직 추가 필요
             // 현재는 모든 소설을 반환하도록 수정
             // if (!isAdmin) {
@@ -181,6 +182,11 @@ public class NovelService {
             //             .filter(novel -> !novel.isBanned())
             //             .collect(Collectors.toList());
             // }
+            
+            // 차단된 소설 필터링 (일반 사용자용)
+            filteredNovelList = novelEntityList.stream()
+                    .filter(novel -> !novel.isBanned())
+                    .collect(Collectors.toList());
 
             List<ResponseGetNovelDto> responseGetNovelDtoList = filteredNovelList.stream()
                     .map(this::convertToDto)
