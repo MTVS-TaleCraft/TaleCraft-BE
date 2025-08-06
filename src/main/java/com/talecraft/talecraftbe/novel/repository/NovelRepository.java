@@ -17,6 +17,8 @@ public interface NovelRepository extends JpaRepository< NovelEntity, Long> {
 
     List<NovelEntity> findAllByUserId(String userId);
 
+    // 차단된 소설 ID 목록 조회
+    List<Long> findNovelIdsByBannedTrue();
 
     long countByIsDeleted(boolean b);
 }

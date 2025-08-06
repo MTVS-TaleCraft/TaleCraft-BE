@@ -4,6 +4,7 @@ import com.talecraft.talecraftbe.report.dto.NovelReportRequest;
 import com.talecraft.talecraftbe.report.dto.NovelReportResponse;
 import com.talecraft.talecraftbe.report.entity.NovelReport;
 import com.talecraft.talecraftbe.report.repository.NovelReportRepository;
+import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,11 @@ public class NovelReportService {
     
     private static final Logger logger = LoggerFactory.getLogger(NovelReportService.class);
     private final NovelReportRepository novelReportRepository;
+    private final NovelRepository novelRepository;
 
-    public NovelReportService(NovelReportRepository novelReportRepository) {
+    public NovelReportService(NovelReportRepository novelReportRepository, NovelRepository novelRepository) {
         this.novelReportRepository = novelReportRepository;
+        this.novelRepository = novelRepository;
     }
 
     /**
@@ -116,10 +119,18 @@ public class NovelReportService {
     }
     
     /**
-     * 신고된 소설 ID 목록 조회 (관리자용)
+     * 신고된 소설 ID 목록 조회 (관리자용) - 신고된 작품 + 차단된 작품
      */
     public List<Long> getReportedNovelIds() {
-        return novelReportRepository.findDistinctNovelIds();
+        // 1. 신고된 소설 ID 목록 가져오기
+        List<Long> reportedNovelIds = novelReportRepository.findDistinctNovelIds();
+        
+        // 2. 차단된 소설 ID 목록 가져오기
+        List<Long> bannedNovelIds = novelRepository.findNovelIdsByBannedTrue();
+        
+        // 3. 두 목록을 합치고 중복 제거
+        reportedNovelIds.addAll(bannedNovelIds);
+        return reportedNovelIds.stream().distinct().collect(Collectors.toList());
     }
 
     /**
