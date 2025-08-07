@@ -1,6 +1,7 @@
 package com.talecraft.talecraftbe.novel.dto.response;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.talecraft.talecraftbe.novel.model.entity.Availability;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import lombok.AllArgsConstructor;
@@ -20,8 +21,11 @@ public class ResponseGetNovelDto {
     private String summary;
     private Availability availability;
     private List<String> tags;
-    boolean isFinished;
-    boolean isDeleted;
-    boolean isBanned;
+    @JsonProperty("isFinished")
+    private boolean isFinished;
+    @JsonProperty("isDeleted")
+    private boolean isDeleted;
+    @JsonProperty("isBanned")
+    private boolean isBanned;
     private long episodeCount;
 }

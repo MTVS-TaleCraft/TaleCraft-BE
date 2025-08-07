@@ -270,6 +270,9 @@ public class NovelService {
         responseGetNovelDto.setAvailability(novelEntity.getAvailability());
         responseGetNovelDto.setBanned(novelEntity.isBanned());
         
+        log.info("convertToDto - novelId: {}, title: {}, isBanned: {}", 
+                novelEntity.getNovelId(), novelEntity.getTitle(), novelEntity.isBanned());
+        
         // 태그 정보 추가
         try {
             var tagResponse = tagService.getTagsByNovelId(novelEntity.getNovelId());
