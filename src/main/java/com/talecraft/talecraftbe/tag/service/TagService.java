@@ -35,9 +35,9 @@ public class TagService {
         this.novelRepository = novelRepository;
     }
     
-    // 작품에 태그 추가
-    public void addTags(Long novelId, List<String> tagNames) {
-        log.info("Adding tags to novel {}: {}", novelId, tagNames);
+    // 작품에 태그 추가 (요청자 정보 포함)
+    public void addTags(Long novelId, List<String> tagNames, String requesterType, String requesterId) {
+        log.info("Adding tags to novel {}: {} by {} (ID: {})", novelId, tagNames, requesterType, requesterId);
         
         for (String tagName : tagNames) {
             if (tagName != null && !tagName.trim().isEmpty()) {
@@ -57,12 +57,17 @@ public class TagService {
                     novelTag.setNovelId(novelId);
                     novelTag.setTagId(tag.getTagId());
                     novelTagRepository.save(novelTag);
-                    log.info("Tag added: {} for novel {}", trimmedTagName, novelId);
+                    log.info("Tag added: {} for novel {} by {} (ID: {})", trimmedTagName, novelId, requesterType, requesterId);
                 } else {
                     log.info("Tag already exists: {} for novel {}", trimmedTagName, novelId);
                 }
             }
         }
+    }
+    
+    // 작품에 태그 추가 (기존 호환성을 위한 오버로드)
+    public void addTags(Long novelId, List<String> tagNames) {
+        addTags(novelId, tagNames, "UNKNOWN", "UNKNOWN");
     }
     
     // 작품의 태그 목록 조회

@@ -87,6 +87,17 @@ public class NovelService {
     public ResponseEntity<ResponseGetNovelDto> getNovel(long novelId, @AuthenticationPrincipal User user) {
         try{
             NovelEntity novelEntity = novelRepository.findByNovelId(novelId);
+            
+            // 차단된 소설에 대한 접근 제어
+            if (novelEntity.isBanned()) {
+                // 관리자가 아닌 경우 차단된 소설 접근 불가
+                if (user == null || user.getAuthorityId() == null || user.getAuthorityId() != 3L) {
+                    log.warn("Non-admin user {} attempted to access banned novel {}", 
+                            user != null ? user.getId() : "anonymous", novelId);
+                    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                }
+            }
+            
             //->Mapper 도입 고려
             ResponseGetNovelDto responseGetNovelDto = new ResponseGetNovelDto();
             responseGetNovelDto.setNovelId(novelEntity.getNovelId());
@@ -155,7 +166,7 @@ public class NovelService {
     //리스트 조회
     //현재는 페이지네이션을 고려하지 않음(MVP)
     @Transactional
-    public ResponseEntity<ResponseGetNovelListDto> getNovelList(String keyword, String type) {
+    public ResponseEntity<ResponseGetNovelListDto> getNovelList(String keyword, String type, User user) {
         try {
             List<NovelEntity> novelEntityList;
 
@@ -171,22 +182,23 @@ public class NovelService {
                 };
             }
 
-            // 관리자 페이지에서는 차단된 소설도 포함, 일반 페이지에서는 차단되지 않은 소설만
+            // 관리자 권한 확인
+            boolean isAdmin = user != null && user.getAuthorityId() != null && user.getAuthorityId() == 3L;
+            log.info("getNovelList - user: {}, authorityId: {}, isAdmin: {}", 
+                    user != null ? user.getId() : "null", 
+                    user != null ? user.getAuthorityId() : "null", 
+                    isAdmin);
+            
+            // 관리자가 아닌 경우 차단된 소설 필터링
             List<NovelEntity> filteredNovelList = novelEntityList;
-            
-            // 일반 사용자는 차단되지 않은 소설만 볼 수 있도록 필터링
-            // TODO: 관리자 권한 확인 로직 추가 필요
-            // 현재는 모든 소설을 반환하도록 수정
-            // if (!isAdmin) {
-            //     filteredNovelList = novelEntityList.stream()
-            //             .filter(novel -> !novel.isBanned())
-            //             .collect(Collectors.toList());
-            // }
-            
-            // 차단된 소설 필터링 (일반 사용자용)
-            filteredNovelList = novelEntityList.stream()
-                    .filter(novel -> !novel.isBanned())
-                    .collect(Collectors.toList());
+            if (!isAdmin) {
+                filteredNovelList = novelEntityList.stream()
+                        .filter(novel -> !novel.isBanned())
+                        .collect(Collectors.toList());
+                log.info("Non-admin user - filtered novels from {} to {}", novelEntityList.size(), filteredNovelList.size());
+            } else {
+                log.info("Admin user - showing all novels: {}", novelEntityList.size());
+            }
 
             List<ResponseGetNovelDto> responseGetNovelDtoList = filteredNovelList.stream()
                     .map(this::convertToDto)
@@ -323,6 +335,40 @@ public class NovelService {
         } catch (Exception e) {
             log.error("소설 차단/해제 중 오류 발생", e);
             return ResponseEntity.status(500).body(Map.of("error", "소설 차단/해제에 실패했습니다."));
+        }
+    }
+
+    // 관리자용 특정 사용자의 모든 소설 목록 조회 (차단된 소설 포함)
+    @Transactional
+    public ResponseEntity<ResponseGetNovelListDto> getNovelListForAdmin(String userId, User adminUser) {
+        try {
+            log.info("getNovelListForAdmin 호출됨 - userId: {}, adminUser: {}", userId, adminUser != null ? adminUser.getId() : "null");
+            
+            // 관리자 권한 확인
+            if (adminUser == null || adminUser.getAuthorityId() == null || adminUser.getAuthorityId() != 3L) {
+                log.warn("Non-admin user {} attempted to access admin novel list", adminUser != null ? adminUser.getId() : "null");
+                return ResponseEntity.status(403).build();
+            }
+
+            // 특정 사용자의 모든 소설 조회 (차단된 소설 포함)
+            List<NovelEntity> novelEntityList = novelRepository.findAllByUserIdAndAvailability(userId, Availability.PUBLIC);
+            log.info("Found {} novels for user {}", novelEntityList.size(), userId);
+
+            // 모든 소설을 포함 (차단된 소설도 포함)
+            List<ResponseGetNovelDto> responseGetNovelDtoList = novelEntityList.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+
+            ResponseGetNovelListDto response = new ResponseGetNovelListDto();
+            response.setNovelList(responseGetNovelDtoList);
+            response.setTotalElements((long) responseGetNovelDtoList.size());
+            
+            log.info("Returning {} novels for admin", responseGetNovelDtoList.size());
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+            log.error("관리자용 소설 목록 조회 중 오류 발생", e);
+            throw new RuntimeException("소설 검색 중 오류 발생", e);
         }
     }
 }

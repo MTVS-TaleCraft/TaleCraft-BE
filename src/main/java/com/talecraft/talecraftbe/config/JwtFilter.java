@@ -72,7 +72,14 @@ public class JwtFilter extends OncePerRequestFilter {
             logger.info("Excluding novels list path");
             return true;
         }
+        // 소설 상세 조회 경로 제외 (인증 불필요) - 단, 관리자 페이지에서의 요청은 인증 필요
         if (path.startsWith("/api/novels/") && "GET".equals(method) && !path.equals("/api/novels/my") && !path.contains("/bookmarks/") && !path.equals("/api/novels/bookmarks") && !path.contains("/like")) {
+            // Referer 헤더를 확인하여 관리자 페이지에서의 요청인지 확인
+            String referer = req.getHeader("Referer");
+            if (referer != null && referer.contains("/admin/")) {
+                logger.info("Admin page request - will be filtered");
+                return false;
+            }
             logger.info("Excluding novel detail path");
             return true;
         }

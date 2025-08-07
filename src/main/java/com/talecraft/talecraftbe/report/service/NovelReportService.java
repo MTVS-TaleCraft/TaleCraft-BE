@@ -119,18 +119,23 @@ public class NovelReportService {
     }
     
     /**
-     * 신고된 소설 ID 목록 조회 (관리자용) - 신고된 작품 + 차단된 작품
+     * 신고된 소설 ID 목록 조회 (관리자용) - 신고된 작품만
      */
     public List<Long> getReportedNovelIds() {
-        // 1. 신고된 소설 ID 목록 가져오기
+        // 신고된 소설 ID 목록만 가져오기
         List<Long> reportedNovelIds = novelReportRepository.findDistinctNovelIds();
-        
-        // 2. 차단된 소설 ID 목록 가져오기
+        logger.info("Found {} reported novel IDs", reportedNovelIds.size());
+        return reportedNovelIds;
+    }
+
+    /**
+     * 차단된 소설 ID 목록 조회 (관리자용) - 차단된 작품만
+     */
+    public List<Long> getBannedNovelIds() {
+        // 차단된 소설 ID 목록만 가져오기
         List<Long> bannedNovelIds = novelRepository.findNovelIdsByIsBannedTrue();
-        
-        // 3. 두 목록을 합치고 중복 제거
-        reportedNovelIds.addAll(bannedNovelIds);
-        return reportedNovelIds.stream().distinct().collect(Collectors.toList());
+        logger.info("Found {} banned novel IDs", bannedNovelIds.size());
+        return bannedNovelIds;
     }
 
     /**

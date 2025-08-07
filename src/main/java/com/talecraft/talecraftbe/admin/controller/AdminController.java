@@ -2,6 +2,9 @@ package com.talecraft.talecraftbe.admin.controller;
 
 import com.talecraft.talecraftbe.auth.dto.UserDetailResponse;
 import com.talecraft.talecraftbe.auth.service.AuthService;
+import com.talecraft.talecraftbe.novel.dto.response.ResponseGetNovelDto;
+import com.talecraft.talecraftbe.novel.dto.response.ResponseGetNovelListDto;
+import com.talecraft.talecraftbe.novel.service.NovelService;
 import com.talecraft.talecraftbe.user.entity.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,9 +21,11 @@ public class AdminController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
     private final AuthService authService;
+    private final NovelService novelService;
 
-    public AdminController(AuthService authService) {
+    public AdminController(AuthService authService, NovelService novelService) {
         this.authService = authService;
+        this.novelService = novelService;
     }
 
     /**
@@ -50,6 +55,26 @@ public class AdminController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * 특정 사용자의 모든 소설 목록 조회 (관리자용 - 차단된 소설 포함)
+     */
+    @GetMapping("/users/{userId}/novels")
+    public ResponseEntity<ResponseGetNovelListDto> getUserNovels(@PathVariable String userId, @AuthenticationPrincipal User user) {
+        try {
+            // 관리자 권한 확인
+            if (user == null || user.getAuthorityId() == null || user.getAuthorityId() != 3L) {
+                logger.warn("Non-admin user {} attempted to access admin API", user != null ? user.getId() : "null");
+                return ResponseEntity.status(403).build();
+            }
+
+            // 관리자용 소설 목록 조회 (차단된 소설 포함)
+            return novelService.getNovelListForAdmin(userId, user);
+        } catch (Exception e) {
+            logger.error("Error getting user novels for admin", e);
             return ResponseEntity.internalServerError().build();
         }
     }

@@ -24,20 +24,25 @@ public class TagController {
     
     // 작품에 태그 추가
     @PostMapping("/novels/{novelId}")
-    public ResponseEntity<?> addTags(@PathVariable Long novelId, @RequestBody TagRequestDTO requestDTO) {
-        log.info("Adding tags to novel {}: {}", novelId, requestDTO.getTagNames());
+    public ResponseEntity<?> addTags(@PathVariable Long novelId, 
+                                    @RequestBody TagRequestDTO requestDTO,
+                                    @RequestParam(required = false) String requesterType,
+                                    @RequestParam(required = false) String requesterId) {
+        log.info("Adding tags to novel {}: {} by {} (ID: {})", novelId, requestDTO.getTagNames(), requesterType, requesterId);
         
         try {
-            tagService.addTags(novelId, requestDTO.getTagNames());
+            tagService.addTags(novelId, requestDTO.getTagNames(), requesterType, requesterId);
             
             Map<String, Object> response = new HashMap<>();
             response.put("message", "태그가 성공적으로 추가되었습니다.");
             response.put("novelId", novelId);
             response.put("addedTags", requestDTO.getTagNames());
+            response.put("requesterType", requesterType);
+            response.put("requesterId", requesterId);
             
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
-            log.error("Error adding tags to novel {}: {}", novelId, e.getMessage());
+            log.error("Error adding tags to novel {} by {} (ID: {}): {}", novelId, requesterType, requesterId, e.getMessage());
             return ResponseEntity.badRequest().body("태그 추가 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
