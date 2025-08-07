@@ -94,20 +94,25 @@ public class TagController {
     
     // 특정 태그 삭제
     @DeleteMapping("/novels/{novelId}")
-    public ResponseEntity<?> deleteTag(@PathVariable Long novelId, @RequestParam String tagName) {
-        log.info("Deleting tag: {} from novel: {}", tagName, novelId);
+    public ResponseEntity<?> deleteTag(@PathVariable Long novelId, 
+                                      @RequestParam String tagName,
+                                      @RequestParam(required = false) String requesterType,
+                                      @RequestParam(required = false) String requesterId) {
+        log.info("Deleting tag: {} from novel: {} by {} (ID: {})", tagName, novelId, requesterType, requesterId);
         
         try {
-            tagService.deleteTag(novelId, tagName);
+            tagService.deleteTag(novelId, tagName, requesterType, requesterId);
             
             Map<String, Object> response = new HashMap<>();
             response.put("message", "태그가 성공적으로 삭제되었습니다.");
             response.put("novelId", novelId);
             response.put("deletedTag", tagName);
+            response.put("requesterType", requesterType);
+            response.put("requesterId", requesterId);
             
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
-            log.error("Error deleting tag {} from novel {}: {}", tagName, novelId, e.getMessage());
+            log.error("Error deleting tag {} from novel {} by {} (ID: {}): {}", tagName, novelId, requesterType, requesterId, e.getMessage());
             return ResponseEntity.badRequest().body("태그 삭제 중 오류가 발생했습니다: " + e.getMessage());
         }
     }

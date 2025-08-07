@@ -1,4 +1,4 @@
-package com.talecraft.talecraftbe.auth.config;
+package com.talecraft.talecraftbe.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -73,5 +73,4 @@ public class JwtProvider {
         
         return new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
     }
-}
-
+} 

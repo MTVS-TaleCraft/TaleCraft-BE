@@ -45,7 +45,7 @@ public class AdminInitializer implements CommandLineRunner {
             adminUser.setId("admin");
             adminUser.setEmail("ADMIN@EXAMPLE.COM");
             adminUser.setUserName("관리자");
-            adminUser.setPassword(passwordEncoder.encode("admin123"));
+            adminUser.setPassword(passwordEncoder.encode("(8QG7g4uh(5A"));
             adminUser.setAuthorityId(3L); // 관리자 권한
             
             userRepository.save(adminUser);

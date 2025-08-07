@@ -8,7 +8,7 @@ import com.talecraft.talecraftbe.auth.dto.FindPasswordRequest;
 import com.talecraft.talecraftbe.auth.dto.UserDetailResponse;
 import com.talecraft.talecraftbe.user.entity.User;
 import com.talecraft.talecraftbe.user.repository.UserRepository;
-import com.talecraft.talecraftbe.auth.config.JwtProvider;
+import com.talecraft.talecraftbe.config.JwtProvider;
 import com.talecraft.talecraftbe.verification.service.EmailVerificationService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

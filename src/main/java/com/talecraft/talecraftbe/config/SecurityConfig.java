@@ -1,4 +1,4 @@
-package com.talecraft.talecraftbe.auth.config;
+package com.talecraft.talecraftbe.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -93,7 +93,10 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/api-docs/**").permitAll()
 
-                        // 4) 나머지 요청은 인증 필요
+                        // 4) 관리자 API (관리자 권한 필요)
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // 5) 나머지 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
                 // JWT 검증 필터 (permitAll 경로는 스킵됨)
@@ -101,6 +104,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-}
-
-
+} 

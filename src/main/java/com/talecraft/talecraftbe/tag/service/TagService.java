@@ -139,15 +139,15 @@ public class TagService {
         return novels;
     }
     
-    // 태그 삭제
+    // 태그 삭제 (요청자 정보 포함)
     @Transactional
-    public void deleteTag(Long novelId, String tagName) {
-        log.info("Deleting tag: {} from novel: {}", tagName, novelId);
+    public void deleteTag(Long novelId, String tagName, String requesterType, String requesterId) {
+        log.info("Deleting tag: {} from novel: {} by {} (ID: {})", tagName, novelId, requesterType, requesterId);
         
         if (novelTagRepository.existsByNovelIdAndTagName(novelId, tagName)) {
             // novel_tags에서 연결 제거
             novelTagRepository.deleteByNovelIdAndTagName(novelId, tagName);
-            log.info("Tag connection deleted: {} from novel {}", tagName, novelId);
+            log.info("Tag connection deleted: {} from novel {} by {} (ID: {})", tagName, novelId, requesterType, requesterId);
             
             // 기본 태그가 아닌 경우, 다른 소설에서 사용하지 않으면 tags 테이블에서도 삭제
             if (!isDefaultTag(tagName)) {
@@ -156,7 +156,7 @@ public class TagService {
                 if (novelsUsingTag.isEmpty()) {
                     // 다른 소설에서 사용하지 않으면 tags 테이블에서 삭제
                     tagRepository.deleteByTagName(tagName);
-                    log.info("Custom tag deleted from tags table: {}", tagName);
+                    log.info("Custom tag deleted from tags table: {} by {} (ID: {})", tagName, requesterType, requesterId);
                 } else {
                     log.info("Custom tag still used by other novels: {}", tagName);
                 }
@@ -164,6 +164,12 @@ public class TagService {
         } else {
             log.warn("Tag not found: {} for novel {}", tagName, novelId);
         }
+    }
+    
+    // 태그 삭제 (기존 호환성을 위한 오버로드)
+    @Transactional
+    public void deleteTag(Long novelId, String tagName) {
+        deleteTag(novelId, tagName, "UNKNOWN", "UNKNOWN");
     }
     
     // 작품의 모든 태그 삭제

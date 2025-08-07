@@ -68,15 +68,9 @@ public class AuthController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(@RequestParam(required = false) String targetUserId) {
+    public ResponseEntity<?> getProfile() {
         try {
-            // 관리자가 특정 사용자 정보를 조회하는 경우
-            if (targetUserId != null && !targetUserId.isEmpty()) {
-                UserDetailResponse userDetail = authService.getUserDetail(targetUserId);
-                return ResponseEntity.ok(userDetail);
-            }
-            
-            // 일반적인 현재 사용자 정보 조회
+            // 현재 사용자 정보 조회
             Map<String, String> userInfo = authService.getCurrentUserInfo();
             return ResponseEntity.ok(userInfo);
         } catch (IllegalArgumentException e) {
@@ -122,16 +116,6 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/profile/users")
-    public ResponseEntity<List<UserDetailResponse>> getAllUsers() {
-        try {
-            List<UserDetailResponse> users = authService.getAllUsers();
-            return ResponseEntity.ok(users);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
+
 
 }

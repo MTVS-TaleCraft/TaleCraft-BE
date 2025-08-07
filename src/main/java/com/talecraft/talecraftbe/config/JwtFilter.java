@@ -1,4 +1,4 @@
-package com.talecraft.talecraftbe.auth.config;
+package com.talecraft.talecraftbe.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -174,8 +174,4 @@ public class JwtFilter extends OncePerRequestFilter {
         logger.info("No token found");
         return null;
     }
-}
-
-
-
-
+} 

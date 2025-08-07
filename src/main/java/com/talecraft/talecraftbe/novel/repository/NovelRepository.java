@@ -4,6 +4,8 @@ import com.talecraft.talecraftbe.novel.model.entity.Availability;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -19,6 +21,7 @@ public interface NovelRepository extends JpaRepository< NovelEntity, Long> {
     List<NovelEntity> findAllByUserId(String userId);
 
     // 차단된 소설 ID 목록 조회
+    @Query("SELECT n.novelId FROM NovelEntity n WHERE n.isBanned = true")
     List<Long> findNovelIdsByIsBannedTrue();
 
     long countByIsDeleted(boolean b);

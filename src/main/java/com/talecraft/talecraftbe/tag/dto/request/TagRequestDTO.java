@@ -23,6 +23,8 @@ public class TagRequestDTO {
     public static class RemoveTagsRequest {
         private Long novelId;
         private List<String> tagNames;
+        private String requesterType; // "AUTHOR" 또는 "ADMIN"
+        private String requesterId; // 요청자 ID
     }
     
     // 태그 검색 요청
