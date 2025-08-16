@@ -61,7 +61,7 @@ logging:
 security:
   jwt:
     secret-key: 0123456789ABCDEF0123456789ABCDEF
-    token-validity-ms: 3600000
+    token-validity-ms: 86400000  # 24시간 (24 * 60 * 60 * 1000)
 
 
 
