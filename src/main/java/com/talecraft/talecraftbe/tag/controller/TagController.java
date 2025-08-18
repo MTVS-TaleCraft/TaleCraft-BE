@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.talecraft.talecraftbe.user.entity.User;
 
 @Slf4j
 @RestController
@@ -77,11 +79,11 @@ public class TagController {
     
     // 태그명으로 작품 검색 (소설 상세 정보 포함)
     @GetMapping("/search/novels")
-    public ResponseEntity<?> searchNovelsByTagWithDetails(@RequestParam String tagName) {
+    public ResponseEntity<?> searchNovelsByTagWithDetails(@RequestParam String tagName, @AuthenticationPrincipal User user) {
         log.info("Searching novels by tag with details: {}", tagName);
         
         try {
-            List<com.talecraft.talecraftbe.novel.dto.response.ResponseGetNovelDto> novels = tagService.searchNovelsByTagWithDetails(tagName);
+            List<com.talecraft.talecraftbe.novel.dto.response.ResponseGetNovelDto> novels = tagService.searchNovelsByTagWithDetails(tagName, user);
             
             Map<String, Object> response = new HashMap<>();
             response.put("tagName", tagName);

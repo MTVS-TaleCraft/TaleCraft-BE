@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
 import com.talecraft.talecraftbe.novel.dto.response.ResponseGetNovelDto;
+import com.talecraft.talecraftbe.user.entity.User;
 
 @Slf4j
 @Service
@@ -102,9 +103,15 @@ public class TagService {
         return response;
     }
     
-    // 태그명으로 작품 검색 (소설 상세 정보 포함)
+    // 태그명으로 작품 검색 (소설 상세 정보 포함) - 기존 호환성을 위한 오버로드
     @Transactional(readOnly = true)
     public List<ResponseGetNovelDto> searchNovelsByTagWithDetails(String tagName) {
+        return searchNovelsByTagWithDetails(tagName, null);
+    }
+    
+    // 태그명으로 작품 검색 (소설 상세 정보 포함)
+    @Transactional(readOnly = true)
+    public List<ResponseGetNovelDto> searchNovelsByTagWithDetails(String tagName, User user) {
         log.info("Searching novels by tag with details: {}", tagName);
         List<Long> novelIds = novelTagRepository.findNovelIdsByTagNameContaining(tagName);
         
@@ -114,6 +121,21 @@ public class TagService {
                 // NovelRepository를 통해 소설 정보 가져오기
                 var novelEntity = novelRepository.findById(novelId).orElse(null);
                 if (novelEntity != null) {
+                    // 관리자 권한 확인
+                    boolean isAdmin = user != null && user.getAuthorityId() != null && user.getAuthorityId() == 3L;
+                    
+                    // 관리자가 아닌 경우 banned된 소설 제외
+                    if (!isAdmin && novelEntity.isBanned()) {
+                        log.debug("Filtering out banned novel: {} for non-admin user", novelId);
+                        continue;
+                    }
+                    
+                    // 삭제된 소설도 제외
+                    if (novelEntity.isDeleted()) {
+                        log.debug("Filtering out deleted novel: {}", novelId);
+                        continue;
+                    }
+                    
                     ResponseGetNovelDto novelDto = new ResponseGetNovelDto();
                     novelDto.setNovelId(novelEntity.getNovelId());
                     novelDto.setTitle(novelEntity.getTitle());
@@ -141,6 +163,7 @@ public class TagService {
             }
         }
         
+        log.info("Found {} novels for tag: {} (filtered for user: {})", novels.size(), tagName, user != null ? user.getId() : "anonymous");
         return novels;
     }
     
