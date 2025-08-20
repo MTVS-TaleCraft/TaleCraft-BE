@@ -12,6 +12,7 @@ import com.talecraft.talecraftbe.ai.model.entity.ChatList;
 import com.talecraft.talecraftbe.ai.model.entity.ChatMessage;
 import com.talecraft.talecraftbe.ai.repository.ChatListRepository;
 import com.talecraft.talecraftbe.ai.repository.ChatMessageRepository;
+import com.talecraft.talecraftbe.comment.exception.NovelNotFoundException;
 import com.talecraft.talecraftbe.novel.episode.model.entity.EpisodeEntity;
 import com.talecraft.talecraftbe.novel.episode.repository.EpisodeRepository;
 import com.talecraft.talecraftbe.novel.model.entity.NovelEntity;
@@ -19,17 +20,20 @@ import com.talecraft.talecraftbe.novel.repository.NovelRepository;
 import com.talecraft.talecraftbe.user.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -61,7 +65,23 @@ public class AIService {
             String url = AIOptions.getAIURL(requestDTO.getOption(), alURL);
             if (requestDTO.getOption() == AIOptions.STORY_EXTENSION)
                 return extendStory(requestDTO, url);
-            ResponseEntity<String> getResponseAI = restTemplate.postForEntity(url, requestDTO, String.class);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> body = new LinkedHashMap<>();
+
+            body.put("question", requestDTO.getQuestion());
+
+            // 이미지 파일이 존재하는 경우에만 body에 추가
+            if (requestDTO.getImage() != null && !requestDTO.getImage().isEmpty()) {
+                byte[] imageBytes = requestDTO.getImage().getBytes();
+                body.put("image", imageBytes);
+            }
+
+            HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> getResponseAI = restTemplate.postForEntity(url, requestEntity, String.class);
             String json = getResponseAI.getBody();
 
             ObjectMapper mapper = new ObjectMapper();
@@ -82,11 +102,11 @@ public class AIService {
         Integer desiredLength = requestDTO.getExtensionLength();
 
         // 입력값 유효성 검사
-        if (desiredLength == null || desiredLength < 1000 || desiredLength > 19000) {
-            throw new IllegalArgumentException("Invalid extensionLength. Must be between 1,000 and 20,000 characters.");
+        if (desiredLength == null || desiredLength < 1000 || desiredLength > 15000) {
+            throw new IllegalArgumentException("글자 늘리기는 최소 1000자 이상, 최대 15000자 이하로 입력해야 합니다!");
         }
         if (currentStory == null || currentStory.trim().isEmpty()) {
-            throw new IllegalArgumentException("Initial story (question) cannot be empty for story extension.");
+            throw new IllegalArgumentException("늘릴 소설의 내용이 있어야 합니다!");
         }
 
         int generatedContentLength = currentStory.length(); // 현재까지 생성된 글자 수
@@ -214,8 +234,7 @@ public class AIService {
 
     public void checkAccess(User user, Long novelId) {
         NovelEntity novelEntity = novelRepository.findById(novelId).orElseThrow(
-                () -> new NoSuchElementException("소설을 찾을 수 없습니다!\n" +
-                        "찾은 소설ID : " + novelId)
+                () -> new NovelNotFoundException(novelId)
         );
 
         if(!novelEntity.getUser().getId().equals(user.getId())) {

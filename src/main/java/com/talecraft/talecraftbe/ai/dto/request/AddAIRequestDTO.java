@@ -1,5 +1,6 @@
 package com.talecraft.talecraftbe.ai.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.talecraft.talecraftbe.ai.dto.data.AIOptions;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,6 +35,6 @@ public class AddAIRequestDTO {
     private AIOptions option;
     @Schema(description = "이야기 길이 늘리기 최소 값", example = "6000", maximum = "15000")
     private Integer extensionLength;
-    @Schema(description = "AI가 참고할 이미지[현재 사용 불가능]", type = "string", format = "binary")
+    @Schema(description = "AI가 참고할 이미지", type = "string", format = "binary")
     private MultipartFile image;
 }
